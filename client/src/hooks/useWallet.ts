@@ -1,15 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
-import { custom } from 'viem';
+import { useCallback } from 'react';
 import { WalletState } from '@/types';
 import { useToast } from './use-toast';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 
 export function useWallet() {
-  const [state, setState] = useState<WalletState>({
-    status: 'disconnected',
-    address: null
-  });
-
   const { toast } = useToast();
+  const { address, isConnected, isConnecting, isReconnecting } = useAccount();
+  const { connectAsync } = useConnect();
+  const { disconnectAsync } = useDisconnect();
 
   const connect = useCallback(async () => {
     if (!window.ethereum) {
@@ -22,27 +21,7 @@ export function useWallet() {
     }
 
     try {
-      setState({ status: 'connecting', address: null });
-
-      // Request accounts
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
-      });
-
-      // Switch to mainnet if needed
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x1' }], // Mainnet
-        });
-      } catch (switchError: any) {
-        console.error('Failed to switch network:', switchError);
-      }
-
-      setState({
-        status: 'connected',
-        address: accounts[0]
-      });
+      await connectAsync({ connector: injected() });
 
       toast({
         title: "Wallet Connected",
@@ -50,11 +29,6 @@ export function useWallet() {
       });
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
-      setState({
-        status: 'error',
-        address: null,
-        error: error as Error
-      });
 
       toast({
         variant: "destructive",
@@ -62,40 +36,28 @@ export function useWallet() {
         description: error.message || "Failed to connect wallet"
       });
     }
-  }, [toast]);
+  }, [connectAsync, toast]);
 
-  const disconnect = useCallback(() => {
-    setState({
-      status: 'disconnected',
-      address: null
-    });
+  const disconnect = useCallback(async () => {
+    try {
+      await disconnectAsync();
+      toast({
+        title: "Wallet Disconnected",
+        description: "Your wallet has been disconnected"
+      });
+    } catch (error) {
+      console.error('Disconnect error:', error);
+    }
+  }, [disconnectAsync, toast]);
 
-    toast({
-      title: "Wallet Disconnected",
-      description: "Your wallet has been disconnected"
-    });
-  }, [toast]);
-
-  // Listen for account changes
-  useEffect(() => {
-    if (!window.ethereum) return;
-
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnect();
-      } else if (state.status === 'connected' && accounts[0] !== state.address) {
-        setState({
-          status: 'connected',
-          address: accounts[0]
-        });
-      }
-    };
-
-    window.ethereum.on('accountsChanged', handleAccountsChanged);
-    return () => {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-    };
-  }, [state.status, state.address, disconnect]);
+  const state: WalletState = {
+    status: isConnecting || isReconnecting
+      ? 'connecting'
+      : isConnected
+      ? 'connected'
+      : 'disconnected',
+    address: address ?? null
+  };
 
   return {
     ...state,
