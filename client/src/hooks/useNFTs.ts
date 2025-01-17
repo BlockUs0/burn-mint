@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { useWallet } from './useWallet';
 import { useQuery } from '@tanstack/react-query';
 import { NFT } from '@/types';
-import nftService from '@/services/web3';
+import { getNFTsForOwner } from '@/services/alchemy';
 import { useToast } from '@/hooks/use-toast';
-import { Address } from 'viem';
 
 export function useNFTs() {
   const { address, status } = useWallet();
@@ -16,8 +15,7 @@ export function useNFTs() {
     queryFn: async () => {
       try {
         if (!address) throw new Error('No wallet connected');
-        // Cast address to viem Address type
-        return await nftService.getNFTs(address as Address);
+        return await getNFTsForOwner(address);
       } catch (error) {
         console.error('Error fetching NFTs:', error);
         toast({
