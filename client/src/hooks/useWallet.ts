@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { mainnet } from 'viem/chains';
+import { useState, useCallback, useEffect } from 'react';
+import { custom } from 'viem';
 import { WalletState } from '@/types';
 import { useToast } from './use-toast';
 
@@ -8,19 +8,11 @@ export function useWallet() {
     status: 'disconnected',
     address: null
   });
+
   const { toast } = useToast();
 
   const connect = useCallback(async () => {
-    console.log('Attempting wallet connection...');
-
     if (!window.ethereum) {
-      console.error('No ethereum provider found');
-      setState(prev => ({
-        ...prev,
-        status: 'error',
-        error: new Error('No wallet detected. Please install MetaMask.')
-      }));
-
       toast({
         variant: "destructive",
         title: "Wallet Error",
@@ -30,56 +22,32 @@ export function useWallet() {
     }
 
     try {
-      setState(prev => ({ ...prev, status: 'connecting' }));
-      console.log('Requesting accounts...');
+      setState({ status: 'connecting', address: null });
 
-      // Request account access
-      const [address] = await window.ethereum.request({
-        method: 'eth_requestAccounts'
+      // Request accounts
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
       });
 
-      console.log('Got address:', address);
-
-      // Check network
-      const chainId = await window.ethereum.request({
-        method: 'eth_chainId'
-      });
-
-      console.log('Current chainId:', chainId, 'Expected:', `0x${mainnet.id.toString(16)}`);
-
-      if (chainId !== `0x${mainnet.id.toString(16)}`) {
-        console.log('Wrong network, requesting switch...');
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: `0x${mainnet.id.toString(16)}` }]
-          });
-          console.log('Network switched successfully');
-        } catch (error: any) {
-          console.error('Network switch failed:', error);
-          toast({
-            variant: "destructive",
-            title: "Network Error",
-            description: "Please switch to Ethereum Mainnet in your wallet"
-          });
-          throw error;
-        }
+      // Switch to mainnet if needed
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }], // Mainnet
+        });
+      } catch (switchError: any) {
+        console.error('Failed to switch network:', switchError);
       }
 
       setState({
         status: 'connected',
-        address
+        address: accounts[0]
       });
 
       toast({
         title: "Wallet Connected",
-        description: "Successfully connected to Ethereum Mainnet"
+        description: "Successfully connected to your wallet"
       });
-
-      // Setup event listeners
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
       setState({
@@ -96,38 +64,7 @@ export function useWallet() {
     }
   }, [toast]);
 
-  const handleAccountsChanged = (accounts: string[]) => {
-    console.log('Accounts changed:', accounts);
-    if (accounts.length === 0) {
-      disconnect();
-    } else {
-      setState(prev => ({
-        ...prev,
-        address: accounts[0]
-      }));
-    }
-  };
-
-  const handleChainChanged = (chainId: string) => {
-    console.log('Chain changed:', chainId);
-    if (chainId !== `0x${mainnet.id.toString(16)}`) {
-      disconnect();
-      toast({
-        variant: "destructive",
-        title: "Network Changed",
-        description: "Please switch back to Ethereum Mainnet"
-      });
-    }
-  };
-
   const disconnect = useCallback(() => {
-    console.log('Disconnecting wallet...');
-    // Remove event listeners
-    if (window.ethereum) {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-    }
-
     setState({
       status: 'disconnected',
       address: null
@@ -138,6 +75,27 @@ export function useWallet() {
       description: "Your wallet has been disconnected"
     });
   }, [toast]);
+
+  // Listen for account changes
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length === 0) {
+        disconnect();
+      } else if (state.status === 'connected' && accounts[0] !== state.address) {
+        setState({
+          status: 'connected',
+          address: accounts[0]
+        });
+      }
+    };
+
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    return () => {
+      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+    };
+  }, [state.status, state.address, disconnect]);
 
   return {
     ...state,
