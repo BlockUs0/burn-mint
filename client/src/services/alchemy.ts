@@ -89,19 +89,19 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
       let imageUrl = '';
 
       // Try different possible image locations in order of preference
-      if (nft.media?.[0]?.gateway) {
+      if (nft.image?.cachedUrl) {
+        imageUrl = nft.image.cachedUrl;
+      } else if (nft.image?.thumbnailUrl) {
+        imageUrl = nft.image.thumbnailUrl;
+      } else if (nft.media?.[0]?.gateway) {
         imageUrl = nft.media[0].gateway;
       } else if (nft.rawMetadata?.image) {
         imageUrl = nft.rawMetadata.image;
-      } else if (nft.tokenUri?.gateway) {
-        imageUrl = nft.tokenUri.gateway;
-      } else if (typeof nft.rawMetadata?.image_url === 'string') {
-        imageUrl = nft.rawMetadata.image_url;
       }
 
       const mappedNFT = {
         tokenId: nft.tokenId,
-        name: nft.title || nft.rawMetadata?.name || `NFT #${nft.tokenId}`,
+        name: nft.name || nft.title || `NFT #${nft.tokenId}`,
         description: nft.description || nft.rawMetadata?.description || 'No description available',
         image: sanitizeImageUrl(imageUrl),
       };
