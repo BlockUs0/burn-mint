@@ -15,7 +15,7 @@ export function WalletButton() {
     );
   }
 
-  if (status === 'connected') {
+  if (status === 'connected' && address) {
     return (
       <Button 
         variant="outline"
@@ -27,8 +27,19 @@ export function WalletButton() {
           whileHover={{ opacity: 1 }}
           className="truncate max-w-[150px]"
         >
-          {`${address?.slice(0, 6)}...${address?.slice(-4)}`}
+          {`${address.slice(0, 6)}...${address.slice(-4)}`}
         </motion.span>
+      </Button>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <Button 
+        variant="destructive"
+        onClick={connect}
+      >
+        Retry Connection
       </Button>
     );
   }
