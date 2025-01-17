@@ -1,0 +1,171 @@
+We are adding support for our back encodeURI, you can see so through  defaultFech, the other code is a log in with eth, we are adding this implementation of log in to our site
+
+// defaultFech
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+
+export const API_URL = "https://api-staging.blockus.net";
+
+export type Config<T = void> = AxiosRequestConfig<T>;
+
+export const defaultFetcher = <T>(url: string, config?: Config): Promise<T> => {
+  return axios.get<T>(url, config).then((response) => {
+    return response.data;
+  });
+};
+
+export const defaultMutation = <T, D>(
+  url: string,
+  body?: D,
+  config?: Config<D>
+): Promise<T> => {
+  return axios
+    .post<T, AxiosResponse<T>, D>(url, body, config)
+    .then((response) => {
+      return response.data;
+    });
+};
+
+useAPI
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  API_URL,
+  Config,
+  defaultFetcher,
+  defaultMutation,
+} from "./defaultFetcher";
+
+type useApiProps = {
+  url: string;
+  enabled?: boolean;
+  config?: Config;
+  key?: string;
+};
+
+type useApiMutationProps<D = undefined> = {
+  url: string;
+  config?: Config<D>;
+};
+
+export const useApi = <T>({
+  url,
+  enabled = true,
+  config,
+  key,
+}: useApiProps) => {
+  const query = useQuery({
+    queryKey: [key ?? url],
+    queryFn: () => defaultFetcher<T>(API_URL + url, config),
+    enabled,
+  });
+
+  return {
+    ...query,
+  };
+};
+
+export const useApiMutation = <T, D = undefined>({
+  url,
+  config,
+}: useApiMutationProps<D>) => {
+  const mutation = useMutation({
+    mutationKey: [url],
+    mutationFn: (body: D) => defaultMutation<T, D>(API_URL + url, body, config),
+  });
+
+  return {
+    ...mutation,
+  };
+};
+
+export const useInvalidateQueries = () => {
+  const queryClient = useQueryClient();
+
+  const invalidateAllQueries = () => {
+    void queryClient.invalidateQueries();
+  };
+
+  return {
+    invalidateAllQueries,
+  };
+};
+
+import { useApiMutation } from "./useApi";
+
+const URL = "/v1/auth/challenge?type=web3";
+
+type ChallengeResponse = {
+  code: string;
+  expiresAt: Date;
+  address: string;
+};
+
+type ChallengeBody = {
+  address?: string;
+};
+
+export const useWeb3Challenge = () => {
+  const mutation = useApiMutation<ChallengeResponse, ChallengeBody>({
+    url: URL,
+  });
+
+  return {
+    ...mutation,
+  };
+};
+
+import { useApiMutation } from "./useApi";
+
+const URL = "/v1/players/login?type=web3";
+
+type LoginResponse = {
+  accessToken: string;
+};
+
+export type LoginPayload = {
+  address?: string;
+  signature: string;
+  chain: "base";
+};
+
+export const useLogin = () => {
+  const mutation = useApiMutation<LoginResponse, LoginPayload>({
+    url: URL,
+    config: {
+      headers: { "X-PROJECT-ID": "YiodrSuXgHaE3623ilMGacKoehVq" },
+    },
+  });
+
+  return {
+    ...mutation,
+  };
+};
+
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import { useWeb3Challenge } from '../api/useWeb3Challenge';
+import { useCallback } from 'react';
+
+export const Wallet = () => {
+    // const { disconnect } = useDisconnect();
+    const { isConnected, address } = useAccount();
+
+    const { mutateAsync: web3ChallengeMutateAsync } = useWeb3Challenge();
+
+    const getChallenge = useCallback(async () => {
+        try {
+            const response = await web3ChallengeMutateAsync({ address });
+            console.log(response);
+        } catch (e) {
+            console.log(e);
+        }
+    }, [web3ChallengeMutateAsync, address]);
+
+    return (
+        <div className='card'>
+            <ConnectButton />
+            {isConnected ? <button className='action' onClick={getChallenge}>Get challenge</button> : null}
+            {isConnected ? <button className='action'>Login</button> : null}
+        </div>
+    );
+};

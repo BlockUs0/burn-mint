@@ -15,6 +15,8 @@ export type LoginResponse = {
 
 export async function getWeb3Challenge(address: Address): Promise<ChallengeResponse> {
   try {
+    console.log('Requesting challenge for address:', address);
+
     const response = await fetch(`${API_URL}/v1/auth/challenge`, {
       method: 'POST',
       headers: {
@@ -33,7 +35,9 @@ export async function getWeb3Challenge(address: Address): Promise<ChallengeRespo
       throw new Error(`Failed to get challenge: ${error}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('Challenge response:', data);
+    return data;
   } catch (error) {
     console.error('Error in getWeb3Challenge:', error);
     throw error;
@@ -52,7 +56,7 @@ export async function web3Login(params: {
       chain: params.chain
     });
 
-    const response = await fetch(`${API_URL}/v1/auth/verify`, {
+    const response = await fetch(`${API_URL}/v1/players/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
