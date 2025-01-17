@@ -41,7 +41,14 @@ export function useWallet() {
   }, [connectAsync, toast]);
 
   const authenticate = useCallback(async () => {
-    if (!address) return;
+    if (!address) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Wallet address not found"
+      });
+      return;
+    }
 
     try {
       setIsAuthenticating(true);
@@ -61,7 +68,7 @@ export function useWallet() {
       const { accessToken } = await web3Login({
         address,
         signature,
-        chain: 'base'
+        chain: 'ethereum'
       });
 
       // Store token
@@ -73,11 +80,20 @@ export function useWallet() {
       });
     } catch (error: any) {
       console.error('Authentication failed:', error);
+
+      // Extract the most user-friendly error message
+      const errorMessage = error.message?.includes('Authentication failed:') 
+        ? error.message 
+        : 'Failed to authenticate wallet. Please try again.';
+
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: error.message || "Failed to authenticate wallet"
+        description: errorMessage
       });
+
+      // Clean up any partial authentication state
+      localStorage.removeItem('auth_token');
     } finally {
       setIsAuthenticating(false);
     }
@@ -93,6 +109,11 @@ export function useWallet() {
       });
     } catch (error) {
       console.error('Disconnect error:', error);
+      toast({
+        variant: "destructive",
+        title: "Disconnect Error",
+        description: "Failed to disconnect wallet"
+      });
     }
   }, [disconnectAsync, toast]);
 

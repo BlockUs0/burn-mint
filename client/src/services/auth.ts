@@ -1,6 +1,7 @@
 import { Address, Hash } from "viem";
 
 const API_URL = "https://api-staging.blockus.net";
+const PROJECT_ID = process.env.VITE_BLOCKUS_PROJECT_ID ?? 'YiodrSuXgHaE3623ilMGacKoehVq';
 
 export type ChallengeResponse = {
   code: string;
@@ -13,38 +14,61 @@ export type LoginResponse = {
 };
 
 export async function getWeb3Challenge(address: Address): Promise<ChallengeResponse> {
-  const response = await fetch(`${API_URL}/v1/auth/challenge?type=web3`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ address })
-  });
+  try {
+    const response = await fetch(`${API_URL}/v1/auth/challenge`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-PROJECT-ID': PROJECT_ID
+      },
+      body: JSON.stringify({ 
+        address,
+        type: 'web3'
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to get challenge');
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Challenge request failed:', error);
+      throw new Error(`Failed to get challenge: ${error}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error in getWeb3Challenge:', error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export async function web3Login(params: {
   address: Address;
   signature: Hash;
-  chain: 'base';
+  chain: string;
 }): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/v1/players/login?type=web3`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-PROJECT-ID': 'YiodrSuXgHaE3623ilMGacKoehVq'
-    },
-    body: JSON.stringify(params)
-  });
+  try {
+    const response = await fetch(`${API_URL}/v1/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-PROJECT-ID': PROJECT_ID
+      },
+      body: JSON.stringify({
+        address: params.address,
+        signature: params.signature,
+        type: 'web3',
+        chain: params.chain || 'ethereum'
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to authenticate');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Login failed:', errorText);
+      throw new Error(`Authentication failed: ${errorText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error in web3Login:', error);
+    throw error;
   }
-
-  return response.json();
 }
