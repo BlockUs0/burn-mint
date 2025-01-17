@@ -46,7 +46,13 @@ export async function web3Login(params: {
   chain: string;
 }): Promise<LoginResponse> {
   try {
-    const response = await fetch(`${API_URL}/v1/auth/login`, {
+    console.log('Sending login request with params:', {
+      address: params.address,
+      signature: params.signature,
+      chain: params.chain
+    });
+
+    const response = await fetch(`${API_URL}/v1/auth/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,8 +61,8 @@ export async function web3Login(params: {
       body: JSON.stringify({
         address: params.address,
         signature: params.signature,
-        type: 'web3',
-        chain: params.chain || 'ethereum'
+        chain: params.chain || 'ethereum',
+        type: 'web3'
       })
     });
 
@@ -66,7 +72,10 @@ export async function web3Login(params: {
       throw new Error(`Authentication failed: ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('Login response:', data);
+
+    return data;
   } catch (error) {
     console.error('Error in web3Login:', error);
     throw error;
