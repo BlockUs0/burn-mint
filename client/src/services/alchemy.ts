@@ -80,18 +80,23 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
         image: {
           media: nft.media?.[0]?.gateway,
           rawImage: nft.rawMetadata?.image,
-          tokenUri: nft.tokenUri?.gateway
+          tokenUri: nft.tokenUri?.gateway,
+          raw: nft.rawMetadata
         }
       });
 
       // Get the best available image URL
       let imageUrl = '';
+
+      // Try different possible image locations in order of preference
       if (nft.media?.[0]?.gateway) {
         imageUrl = nft.media[0].gateway;
       } else if (nft.rawMetadata?.image) {
         imageUrl = nft.rawMetadata.image;
       } else if (nft.tokenUri?.gateway) {
         imageUrl = nft.tokenUri.gateway;
+      } else if (typeof nft.rawMetadata?.image_url === 'string') {
+        imageUrl = nft.rawMetadata.image_url;
       }
 
       const mappedNFT = {
