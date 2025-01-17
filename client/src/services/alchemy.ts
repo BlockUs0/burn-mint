@@ -1,7 +1,7 @@
 import { NFT } from '@/types';
 
 const ALCHEMY_BASE_URL = 'https://eth-mainnet.g.alchemy.com/nft/v3';
-const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
+const ALCHEMY_API_KEY = 'Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3';
 
 export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
   try {
