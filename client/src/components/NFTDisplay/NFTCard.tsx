@@ -11,6 +11,8 @@ interface NFTCardProps {
 }
 
 export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
+  console.log('NFTCard rendering with data:', nft);
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -31,6 +33,7 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
             alt={nft.name}
             className="object-cover w-full h-full rounded-t-lg"
             onError={(e) => {
+              console.log('Image failed to load:', nft.image);
               e.currentTarget.src = 'https://placehold.co/200x200/orange/white?text=NFT';
             }}
           />

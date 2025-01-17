@@ -67,10 +67,23 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
     );
 
     const data = await response.json();
-    console.log('Alchemy response:', data); // For debugging
 
-    // Transform Alchemy response to our NFT type
+    // Log the full response structure
+    console.log('Full Alchemy response:', JSON.stringify(data, null, 2));
+
+    // Transform and log each NFT's data
     return data.ownedNfts.map((nft: any) => {
+      console.log('Processing NFT:', {
+        id: nft.tokenId,
+        title: nft.title,
+        rawName: nft.rawMetadata?.name,
+        image: {
+          media: nft.media?.[0]?.gateway,
+          rawImage: nft.rawMetadata?.image,
+          tokenUri: nft.tokenUri?.gateway
+        }
+      });
+
       // Get the best available image URL
       let imageUrl = '';
       if (nft.media?.[0]?.gateway) {
@@ -81,12 +94,15 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
         imageUrl = nft.tokenUri.gateway;
       }
 
-      return {
+      const mappedNFT = {
         tokenId: nft.tokenId,
-        name: nft.title || nft.rawMetadata?.name || 'Unnamed NFT',
+        name: nft.title || nft.rawMetadata?.name || `NFT #${nft.tokenId}`,
         description: nft.description || nft.rawMetadata?.description || 'No description available',
         image: sanitizeImageUrl(imageUrl),
       };
+
+      console.log('Mapped NFT:', mappedNFT);
+      return mappedNFT;
     });
   } catch (error) {
     console.error('Error fetching NFTs from Alchemy:', error);
