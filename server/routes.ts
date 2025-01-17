@@ -3,10 +3,6 @@ import { createServer, type Server } from "http";
 import { db } from "@db";
 import { burns, type InsertBurn } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { recoverMessageAddress } from 'viem';
-
-// Store challenges in memory (in production, use Redis or similar)
-const challenges = new Map<string, { code: string, expiresAt: Date }>();
 
 export function registerRoutes(app: Express): Server {
   // Burns API routes
@@ -70,94 +66,6 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error('Failed to fetch burn record:', error);
       res.status(500).json({ message: 'Failed to fetch burn record' });
-    }
-  });
-
-  // Auth routes
-  app.post('/api/v1/auth/challenge', async (req, res) => {
-    try {
-      const { address } = req.body;
-      if (!address) {
-        return res.status(400).json({ message: 'Address is required' });
-      }
-
-      console.log('Generating challenge for address:', address);
-
-      const nonce = Date.now().toString();
-      const code = `Sign this message to authenticate with Phoenix NFT Burning\nNonce: ${nonce}`;
-      const challenge = {
-        code,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
-        address
-      };
-
-      // Store the challenge
-      challenges.set(address.toLowerCase(), {
-        code,
-        expiresAt: challenge.expiresAt
-      });
-
-      console.log('Challenge generated:', { address, nonce });
-      res.json(challenge);
-    } catch (error) {
-      console.error('Failed to generate challenge:', error);
-      res.status(500).json({ message: 'Failed to generate challenge' });
-    }
-  });
-
-  app.post('/api/v1/auth/login', async (req, res) => {
-    try {
-      const { address, signature, chain } = req.body;
-      if (!address || !signature || !chain) {
-        return res.status(400).json({ message: 'Missing required fields' });
-      }
-
-      console.log('Login attempt:', { address, chain });
-
-      // Get stored challenge
-      const storedChallenge = challenges.get(address.toLowerCase());
-      if (!storedChallenge) {
-        console.error('No challenge found for address:', address);
-        return res.status(401).json({ message: 'No challenge found, please request a new one' });
-      }
-
-      if (storedChallenge.expiresAt < new Date()) {
-        console.error('Challenge expired for address:', address);
-        challenges.delete(address.toLowerCase());
-        return res.status(401).json({ message: 'Challenge expired, please request a new one' });
-      }
-
-      // Verify the signature
-      const recoveredAddress = await recoverMessageAddress({
-        message: storedChallenge.code,
-        signature,
-      });
-
-      console.log('Signature verification:', {
-        recoveredAddress,
-        originalAddress: address,
-        matches: recoveredAddress.toLowerCase() === address.toLowerCase()
-      });
-
-      if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
-        return res.status(401).json({ message: 'Invalid signature' });
-      }
-
-      // Clear used challenge
-      challenges.delete(address.toLowerCase());
-
-      // Generate a simple JWT-like token
-      const token = Buffer.from(JSON.stringify({
-        address,
-        chain,
-        exp: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-      })).toString('base64');
-
-      console.log('Authentication successful for address:', address);
-      res.json({ accessToken: token });
-    } catch (error) {
-      console.error('Authentication failed:', error);
-      res.status(500).json({ message: 'Authentication failed' });
     }
   });
 

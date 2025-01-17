@@ -61,7 +61,7 @@ export function useWallet() {
       const { accessToken } = await web3Login({
         address,
         signature,
-        chain: 'mainnet'
+        chain: 'base'
       });
 
       // Store token

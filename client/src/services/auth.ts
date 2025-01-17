@@ -1,6 +1,6 @@
 import { Address, Hash } from "viem";
 
-const API_BASE = '/api/v1';
+const API_URL = "https://api-staging.blockus.net";
 
 export type ChallengeResponse = {
   code: string;
@@ -13,7 +13,7 @@ export type LoginResponse = {
 };
 
 export async function getWeb3Challenge(address: Address): Promise<ChallengeResponse> {
-  const response = await fetch(`${API_BASE}/auth/challenge?type=web3`, {
+  const response = await fetch(`${API_URL}/v1/auth/challenge?type=web3`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -31,16 +31,15 @@ export async function getWeb3Challenge(address: Address): Promise<ChallengeRespo
 export async function web3Login(params: {
   address: Address;
   signature: Hash;
+  chain: 'base';
 }): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE}/auth/login?type=web3`, {
+  const response = await fetch(`${API_URL}/v1/players/login?type=web3`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-PROJECT-ID': 'YiodrSuXgHaE3623ilMGacKoehVq'
     },
-    body: JSON.stringify({
-      ...params,
-      chain: 'mainnet'
-    })
+    body: JSON.stringify(params)
   });
 
   if (!response.ok) {
