@@ -1,16 +1,16 @@
-import { createPublicClient, createWalletClient, http, custom, PublicClient, WalletClient, Address, Hash } from "viem";
-import { arbitrum } from "viem/chains";
-import { NFT } from "@/types";
+// constants.ts
+export const NFT_CONTRACT_ADDRESS = "0x85be9de7a369850a964616a2c04d79000d168dea";
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-declare global {
-  interface Window {
-    ethereum: any;
-  }
+// types.ts
+export interface NFT {
+  tokenId: string;
+  name: string;
+  description: string;
+  image: string;
 }
 
-export const NFT_CONTRACT_ADDRESS = "0x85be9de7a369850a964616a2c04d79000d168dea" as Address;
-export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as Address;
-
+// abis/nft.ts
 export const NFT_ABI = [
   {
     "inputs": [{"internalType": "address","name": "owner","type": "address"}],
@@ -66,6 +66,10 @@ export const NFT_ABI = [
   }
 ] as const;
 
+// clients.ts
+import { createPublicClient, createWalletClient, http, custom, PublicClient, WalletClient } from "viem";
+import { arbitrum } from "viem/chains";
+
 export const publicClient = createPublicClient({
   chain: arbitrum,
   transport: http(),
@@ -79,39 +83,19 @@ export function getWalletClient(): WalletClient {
   });
 }
 
-async function parseTokenUri(uri: string) {
-  try {
-    // Handle IPFS URIs
-    const url = uri.startsWith('ipfs://')
-      ? `https://ipfs.io/ipfs/${uri.slice(7)}`
-      : uri;
+// nft.ts
+import { parseTokenUri } from './utils';
+import { NFT_CONTRACT_ADDRESS, ZERO_ADDRESS } from './constants';
+import { NFT_ABI } from './abis/nft';
+import { PublicClient, WalletClient } from 'viem';
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch metadata');
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error parsing token URI:', error);
-    throw new Error('Failed to parse token metadata');
-  }
-}
-
-class NFTService {
-  private walletClient: WalletClient | null = null;
-
+export class NFTService {
   constructor(
     private readonly publicClient: PublicClient,
+    private readonly walletClient: WalletClient
   ) {}
 
-  private async getWalletClient() {
-    if (!this.walletClient) {
-      this.walletClient = getWalletClient();
-    }
-    const [account] = await this.walletClient.requestAddresses();
-    return { client: this.walletClient, account };
-  }
-
-  async getNFTs(address: Address): Promise<NFT[]> {
+  async getNFTs(address: string): Promise<NFT[]> {
     try {
       // Get token IDs owned by address
       const tokenIds = await this.publicClient.readContract({
@@ -132,7 +116,7 @@ class NFTService {
           });
 
           const metadata = await parseTokenUri(uri);
-
+          
           return {
             tokenId: tokenId.toString(),
             name: metadata.name,
@@ -149,7 +133,7 @@ class NFTService {
     }
   }
 
-  async checkApproval(ownerAddress: Address): Promise<boolean> {
+  async checkApproval(ownerAddress: string): Promise<boolean> {
     try {
       return await this.publicClient.readContract({
         address: NFT_CONTRACT_ADDRESS,
@@ -163,16 +147,13 @@ class NFTService {
     }
   }
 
-  async setApproval(): Promise<Hash> {
+  async setApproval(): Promise<string> {
     try {
-      const { client, account } = await this.getWalletClient();
-      return await client.writeContract({
+      return await this.walletClient.writeContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_ABI,
         functionName: "setApprovalForAll",
         args: [NFT_CONTRACT_ADDRESS, true],
-        account,
-        chain: arbitrum,
       });
     } catch (error) {
       console.error('Error setting approval:', error);
@@ -180,10 +161,8 @@ class NFTService {
     }
   }
 
-  async burnNFT(tokenId: string): Promise<Hash> {
+  async burnNFT(tokenId: string): Promise<string> {
     try {
-      const { client, account } = await this.getWalletClient();
-
       // Verify ownership
       const ownerAddress = await this.publicClient.readContract({
         address: NFT_CONTRACT_ADDRESS,
@@ -191,10 +170,6 @@ class NFTService {
         functionName: "ownerOf",
         args: [BigInt(tokenId)],
       });
-
-      if (ownerAddress.toLowerCase() !== account.toLowerCase()) {
-        throw new Error('You do not own this NFT');
-      }
 
       // Check if approved
       const isApproved = await this.checkApproval(ownerAddress);
@@ -205,7 +180,7 @@ class NFTService {
       }
 
       // Perform burn
-      const hash = await client.writeContract({
+      const hash = await this.walletClient.writeContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_ABI,
         functionName: 'transferFrom',
@@ -214,8 +189,6 @@ class NFTService {
           ZERO_ADDRESS,
           BigInt(tokenId)
         ],
-        account,
-        chain: arbitrum,
       });
 
       return hash;
@@ -226,6 +199,30 @@ class NFTService {
   }
 }
 
-// Initialize and export default instance
-const nftService = new NFTService(publicClient);
-export default nftService;
+// utils.ts
+export async function parseTokenUri(uri: string) {
+  try {
+    // Handle IPFS URIs
+    const url = uri.startsWith('ipfs://')
+      ? `https://ipfs.io/ipfs/${uri.slice(7)}`
+      : uri;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch metadata');
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error parsing token URI:', error);
+    throw new Error('Failed to parse token metadata');
+  }
+}
+
+// usage example
+const nftService = new NFTService(publicClient, getWalletClient());
+
+try {
+  const nfts = await nftService.getNFTs(address);
+  const burnHash = await nftService.burnNFT(tokenId);
+} catch (error) {
+  console.error('Operation failed:', error);
+}

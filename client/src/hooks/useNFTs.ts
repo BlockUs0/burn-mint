@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { useWallet } from './useWallet';
 import { useQuery } from '@tanstack/react-query';
 import { NFT } from '@/types';
-import { getNFTs } from '@/services/web3';
+import nftService from '@/services/web3';
 
 export function useNFTs() {
   const { address, status } = useWallet();
   const [selectedNFT, setSelectedNFT] = useState<string | null>(null);
 
-  const { data: nfts = [], isLoading } = useQuery({
+  const { data: nfts = [], isLoading, error } = useQuery({
     queryKey: ['nfts', address],
-    queryFn: () => getNFTs(address!),
+    queryFn: () => nftService.getNFTs(address!),
     enabled: status === 'connected' && !!address,
+    retry: 2,
   });
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export function useNFTs() {
   return {
     nfts,
     loading: isLoading,
+    error,
     selectedNFT,
     selectNFT: setSelectedNFT
   };
