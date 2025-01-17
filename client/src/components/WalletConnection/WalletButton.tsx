@@ -4,19 +4,21 @@ import { Flame, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function WalletButton() {
-  const { status, address, connect, disconnect } = useWallet();
+  const { status, address, connect, authenticate, disconnect } = useWallet();
 
-  if (status === 'connecting') {
+  if (status === 'connecting' || status === 'authenticating') {
     return (
       <Button disabled>
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Connecting...
+        {status === 'authenticating' ? 'Authenticating...' : 'Connecting...'}
       </Button>
     );
   }
 
   if (status === 'connected' && address) {
-    return (
+    const isAuthenticated = !!localStorage.getItem('auth_token');
+
+    return isAuthenticated ? (
       <Button 
         variant="outline"
         onClick={disconnect}
@@ -30,16 +32,13 @@ export function WalletButton() {
           {`${address.slice(0, 6)}...${address.slice(-4)}`}
         </motion.span>
       </Button>
-    );
-  }
-
-  if (status === 'error') {
-    return (
+    ) : (
       <Button 
-        variant="destructive"
-        onClick={connect}
+        onClick={authenticate}
+        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
       >
-        Retry Connection
+        <Flame className="mr-2 h-4 w-4" />
+        Sign In
       </Button>
     );
   }

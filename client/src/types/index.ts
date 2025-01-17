@@ -6,7 +6,7 @@ export interface NFT {
 }
 
 export type WalletState = {
-  status: 'disconnected' | 'connecting' | 'connected' | 'error';
+  status: 'disconnected' | 'connecting' | 'connected' | 'authenticating' | 'error';
   address: string | null;
   error?: Error;
 };

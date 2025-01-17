@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { db } from "@db";
 import { burns, type InsertBurn } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { recoverMessageAddress } from 'viem';
 
 export function registerRoutes(app: Express): Server {
   // Burns API routes
@@ -63,6 +64,58 @@ export function registerRoutes(app: Express): Server {
       res.json(burn);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch burn record' });
+    }
+  });
+
+  // Auth routes
+  app.post('/api/v1/auth/challenge', async (req, res) => {
+    try {
+      const { address } = req.body;
+      if (!address) {
+        return res.status(400).json({ message: 'Address is required' });
+      }
+
+      const code = `Sign this message to authenticate with Phoenix NFT Burning\nNonce: ${Date.now()}`;
+      const challenge = {
+        code,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+        address
+      };
+
+      res.json(challenge);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to generate challenge' });
+    }
+  });
+
+  app.post('/api/v1/auth/login', async (req, res) => {
+    try {
+      const { address, signature, chain } = req.body;
+      if (!address || !signature || !chain) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Verify the signature
+      const message = `Sign this message to authenticate with Phoenix NFT Burning\nNonce: ${Date.now()}`;
+      const recoveredAddress = await recoverMessageAddress({
+        message,
+        signature,
+      });
+
+      if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
+        return res.status(401).json({ message: 'Invalid signature' });
+      }
+
+      // Generate a simple JWT-like token (in production, use a proper JWT library)
+      const token = Buffer.from(JSON.stringify({
+        address,
+        chain,
+        exp: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+      })).toString('base64');
+
+      res.json({ accessToken: token });
+    } catch (error) {
+      res.status(500).json({ message: 'Authentication failed' });
     }
   });
 

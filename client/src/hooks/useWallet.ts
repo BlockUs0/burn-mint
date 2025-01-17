@@ -1,14 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { WalletState } from '@/types';
 import { useToast } from './use-toast';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
+import { getWeb3Challenge, web3Login } from '@/services/auth';
 
 export function useWallet() {
   const { toast } = useToast();
   const { address, isConnected, isConnecting, isReconnecting } = useAccount();
   const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
+  const { signMessageAsync } = useSignMessage();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const connect = useCallback(async () => {
     if (!window.ethereum) {
@@ -38,9 +41,49 @@ export function useWallet() {
     }
   }, [connectAsync, toast]);
 
+  const authenticate = useCallback(async () => {
+    if (!address) return;
+
+    try {
+      setIsAuthenticating(true);
+
+      // Get challenge
+      const challenge = await getWeb3Challenge(address);
+
+      // Sign challenge
+      const signature = await signMessageAsync({ 
+        message: challenge.code 
+      });
+
+      // Login with signature
+      const { accessToken } = await web3Login({
+        address,
+        signature,
+      });
+
+      // Store token
+      localStorage.setItem('auth_token', accessToken);
+
+      toast({
+        title: "Authentication Successful",
+        description: "Your wallet is now connected and authenticated"
+      });
+    } catch (error: any) {
+      console.error('Authentication failed:', error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Failed",
+        description: error.message || "Failed to authenticate wallet"
+      });
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }, [address, signMessageAsync, toast]);
+
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
+      localStorage.removeItem('auth_token');
       toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected"
@@ -51,7 +94,9 @@ export function useWallet() {
   }, [disconnectAsync, toast]);
 
   const state: WalletState = {
-    status: isConnecting || isReconnecting
+    status: isAuthenticating
+      ? 'authenticating'
+      : isConnecting || isReconnecting
       ? 'connecting'
       : isConnected
       ? 'connected'
@@ -62,6 +107,7 @@ export function useWallet() {
   return {
     ...state,
     connect,
+    authenticate,
     disconnect
   };
 }
