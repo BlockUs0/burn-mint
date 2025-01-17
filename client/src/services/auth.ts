@@ -57,7 +57,6 @@ export async function web3Login({
   });
 
   const URL = "/v1/players/login?type=web3";
-
   const response = await fetch(`${API_URL}${URL}`, {
     method: "POST",
     headers: {
