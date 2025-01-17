@@ -1,6 +1,6 @@
 import { NFT } from '@/types';
 
-const ALCHEMY_BASE_URL = 'https://eth-mainnet.g.alchemy.com/v2';
+const ALCHEMY_BASE_URL = 'https://eth-mainnet.g.alchemy.com/nft/v3';
 const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
 
 export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
@@ -15,17 +15,19 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch NFTs from Alchemy');
+      const error = await response.text();
+      console.error('Alchemy API error:', error);
+      throw new Error(`Alchemy API error: ${error}`);
     }
 
     const data = await response.json();
-    
+
     // Transform Alchemy response to our NFT type
     return data.ownedNfts.map((nft: any) => ({
-      tokenId: nft.id.tokenId,
-      name: nft.title || 'Unnamed NFT',
+      tokenId: nft.tokenId?.tokenId || nft.tokenId,
+      name: nft.title || nft.name || 'Unnamed NFT',
       description: nft.description || 'No description available',
-      image: nft.media[0]?.gateway || nft.metadata?.image || '',
+      image: nft.media?.[0]?.gateway || nft.rawMetadata?.image || '',
     }));
   } catch (error) {
     console.error('Error fetching NFTs from Alchemy:', error);
