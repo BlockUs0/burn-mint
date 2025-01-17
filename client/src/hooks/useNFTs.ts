@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from './useWallet';
 import { useQuery } from '@tanstack/react-query';
 import { NFT } from '@/types';
-import { getNFTsForOwner } from '@/services/alchemy';
+import alchemyService from '@/services/alchemy';
 import { useToast } from '@/hooks/use-toast';
 
 export function useNFTs() {
@@ -15,7 +15,7 @@ export function useNFTs() {
     queryFn: async () => {
       try {
         if (!address) throw new Error('No wallet connected');
-        return await getNFTsForOwner(address);
+        return await alchemyService.getNFTsForOwner(address);
       } catch (error) {
         console.error('Error fetching NFTs:', error);
         toast({
