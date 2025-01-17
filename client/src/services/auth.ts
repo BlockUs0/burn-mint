@@ -1,7 +1,7 @@
 import { Address, Hash } from "viem";
 
 const API_URL = "https://api-staging.blockus.net";
-const PROJECT_ID = process.env.VITE_BLOCKUS_PROJECT_ID ?? 'YiodrSuXgHaE3623ilMGacKoehVq';
+const PROJECT_ID = 'YiodrSuXgHaE3623ilMGacKoehVq';
 
 export type ChallengeResponse = {
   code: string;
