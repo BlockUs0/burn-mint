@@ -1,17 +1,25 @@
 import { useNFTs } from "@/hooks/useNFTs";
 import { NFTCard } from "./NFTCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export function NFTGrid() {
   const { nfts, loading, selectedNFT, selectNFT } = useNFTs();
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="aspect-square rounded-lg" />
-        ))}
+      <div className="space-y-8">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <span className="ml-3 text-lg text-muted-foreground">
+            Fetching your NFTs...
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="aspect-square rounded-lg" />
+          ))}
+        </div>
       </div>
     );
   }

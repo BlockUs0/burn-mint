@@ -1,6 +1,5 @@
 import { createPublicClient, createWalletClient, http, custom, PublicClient, WalletClient, Address, Hash } from "viem";
-import { arbitrum } from "viem/chains";
-import { NFT } from "@/types";
+import { mainnet } from "viem/chains";
 
 declare global {
   interface Window {
@@ -67,14 +66,14 @@ export const NFT_ABI = [
 ] as const;
 
 export const publicClient = createPublicClient({
-  chain: arbitrum,
+  chain: mainnet,
   transport: http(),
 });
 
 export function getWalletClient(): WalletClient {
   if (!window.ethereum) throw new Error("No wallet detected");
   return createWalletClient({
-    chain: arbitrum,
+    chain: mainnet,
     transport: custom(window.ethereum),
   });
 }
@@ -172,7 +171,7 @@ class NFTService {
         functionName: "setApprovalForAll",
         args: [NFT_CONTRACT_ADDRESS, true],
         account,
-        chain: arbitrum,
+        chain: mainnet,
       });
     } catch (error) {
       console.error('Error setting approval:', error);
@@ -215,7 +214,7 @@ class NFTService {
           BigInt(tokenId)
         ],
         account,
-        chain: arbitrum,
+        chain: mainnet,
       });
 
       return hash;
