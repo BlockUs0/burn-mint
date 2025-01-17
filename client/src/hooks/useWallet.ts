@@ -32,7 +32,6 @@ export function useWallet() {
       });
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
-
       toast({
         variant: "destructive",
         title: "Connection Failed",
@@ -46,19 +45,23 @@ export function useWallet() {
 
     try {
       setIsAuthenticating(true);
+      console.log('Starting authentication for address:', address);
 
       // Get challenge
       const challenge = await getWeb3Challenge(address);
+      console.log('Received challenge:', challenge);
 
       // Sign challenge
       const signature = await signMessageAsync({ 
         message: challenge.code 
       });
+      console.log('Message signed:', { signature });
 
       // Login with signature
       const { accessToken } = await web3Login({
         address,
         signature,
+        chain: 'mainnet'
       });
 
       // Store token
