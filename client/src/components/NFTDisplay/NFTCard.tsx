@@ -24,21 +24,26 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
         onClick={onSelect}
       >
         {selected && <FireParticles />}
-        
+
         <div className="aspect-square relative">
           <img 
             src={nft.image} 
             alt={nft.name}
             className="object-cover w-full h-full rounded-t-lg"
+            onError={(e) => {
+              e.currentTarget.src = 'https://placehold.co/200x200/orange/white?text=NFT';
+            }}
           />
         </div>
 
-        <div className="p-4">
-          <h3 className="font-semibold mb-2">{nft.name}</h3>
-          <p className="text-sm text-muted-foreground mb-4 truncate">
+        <div className="p-3">
+          <h3 className="font-semibold text-sm truncate mb-1">
+            {nft.name || `NFT #${nft.tokenId}`}
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
             {nft.description}
           </p>
-          
+
           <BurnButton
             tokenId={nft.tokenId}
             disabled={!selected}
