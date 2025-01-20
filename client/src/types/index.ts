@@ -1,6 +1,6 @@
 export interface NFT {
   tokenId: string;
-  tokenAddress: string; // Add tokenAddress field
+  tokenAddress: string;
   name: string;
   description: string;
   image: string;
@@ -30,8 +30,13 @@ export type BurnState = {
 export interface BurnRecord {
   id: string;
   tokenId: string;
-  tokenAddress: string; // Add tokenAddress field
-  txHash: string;
+  chain: string;
+  walletAddress: string;
+  burnProof: {
+    type: 'evm';
+    txHash: string;
+  };
+  amount: number;
   timestamp: string;
 }
 

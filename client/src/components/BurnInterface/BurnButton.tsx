@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useBurnState } from "@/hooks/useBurnState";
+import { useWallet } from "@/hooks/useWallet";
 import { Flame, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface BurnButtonProps {
   tokenId: string;
-  tokenAddress: string;
+  tokenAddress: `0x${string}`;
   disabled?: boolean;
 }
 
@@ -15,11 +16,19 @@ export function BurnButton({
   disabled,
 }: BurnButtonProps) {
   const { burn, status } = useBurnState();
-  console.log(">>>>>>", tokenId, tokenAddress);
+  const { address } = useWallet();
+
+  const handleBurn = () => {
+    if (!address) {
+      throw new Error('Wallet not connected');
+    }
+    burn({ tokenId, tokenAddress, walletAddress: address });
+  };
+
   return (
     <Button
-      onClick={() => burn({ tokenId, tokenAddress })}
-      disabled={disabled || status === "burning"}
+      onClick={handleBurn}
+      disabled={disabled || status === "burning" || !address}
       className="w-full bg-red-600 hover:bg-red-700"
     >
       {status === "burning" ? (
