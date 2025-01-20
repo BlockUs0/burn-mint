@@ -137,7 +137,7 @@ class NFTService {
     }
   }
 
-  async burnNFT(tokenId: string): Promise<Hash> {
+  async burnNFT(tokenAddress: Address, tokenId: string): Promise<Hash> {
     try {
       const { client, account } = await this.getWalletClient();
 
@@ -145,17 +145,14 @@ class NFTService {
         throw new Error("No wallet detected");
       }
 
-      // Ensure user is on correct chain before proceeding
-      await this.ensureCorrectChain(client);
-
       // Perform burn by sending to zero address
       const hash = await client.writeContract({
-        address: NFT_CONTRACT_ADDRESS,
+        address: tokenAddress,
         abi: NFT_ABI,
         functionName: "transferFrom",
         args: [account, ZERO_ADDRESS, BigInt(tokenId)],
         account,
-        chain: mainnet, // Explicitly use mainnet instead of client.chain
+        chain: client.chain,
       });
 
       return hash;
