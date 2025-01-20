@@ -1,12 +1,18 @@
 import { NFT } from "@/types";
-import { networks } from "@/config/networks";
-import { useNetwork } from "wagmi";
+import { networks, type SupportedChainId, isChainSupported } from "@/config/networks";
 
-const ALCHEMY_API_KEY = "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
-const NFT_CONTRACT_ADDRESS = "0x85be9de7a369850a964616a2c04d79000d168dea";
+const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
 
-function getAlchemyBaseUrl(chainId: number) {
+function getAlchemyBaseUrl(chainId: number): string {
+  if (!isChainSupported(chainId)) {
+    throw new Error(`Chain ID ${chainId} is not supported`);
+  }
+
   const network = networks[chainId];
+  if (!network?.alchemyUrl) {
+    throw new Error(`Alchemy URL not configured for chain ID ${chainId}`);
+  }
+
   return `${network.alchemyUrl}/${ALCHEMY_API_KEY}`;
 }
 
@@ -59,11 +65,16 @@ async function fetchWithRetry(
 
 export async function getNFTsForOwner(ownerAddress: string, chainId: number): Promise<NFT[]> {
   try {
+    // Validate chain ID before proceeding
+    if (!isChainSupported(chainId)) {
+      throw new Error(`Chain ID ${chainId} is not supported`);
+    }
+
     const baseUrl = getAlchemyBaseUrl(chainId);
     const url = new URL(`${baseUrl}/getNFTsForOwner`);
     url.searchParams.append("owner", ownerAddress);
     url.searchParams.append("withMetadata", "true");
-    url.searchParams.append("contractAddresses[]", NFT_CONTRACT_ADDRESS);
+    url.searchParams.append("contractAddresses[]", networks[chainId].nftContractAddress);
 
     const response = await fetchWithRetry(url.toString(), {
       headers: {

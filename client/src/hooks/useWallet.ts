@@ -1,9 +1,9 @@
-import { useCallback, useState } from 'react';
-import { WalletState } from '@/types';
-import { useToast } from './use-toast';
-import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi';
-import { injected } from 'wagmi/connectors';
-import { getWeb3Challenge, web3Login } from '@/services/auth';
+import { useCallback, useState } from "react";
+import { WalletState } from "@/types";
+import { useToast } from "./use-toast";
+import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
+import { injected } from "wagmi/connectors";
+import { getWeb3Challenge, web3Login } from "@/services/auth";
 
 export function useWallet() {
   const { toast } = useToast();
@@ -18,7 +18,7 @@ export function useWallet() {
       toast({
         variant: "destructive",
         title: "Wallet Error",
-        description: "Please install MetaMask to continue"
+        description: "Please install MetaMask to continue",
       });
       return;
     }
@@ -28,14 +28,14 @@ export function useWallet() {
 
       toast({
         title: "Wallet Connected",
-        description: "Successfully connected to your wallet"
+        description: "Successfully connected to your wallet",
       });
     } catch (error: any) {
-      console.error('Wallet connection failed:', error);
+      console.error("Wallet connection failed:", error);
       toast({
         variant: "destructive",
         title: "Connection Failed",
-        description: error.message || "Failed to connect wallet"
+        description: error.message || "Failed to connect wallet",
       });
     }
   }, [connectAsync, toast]);
@@ -45,55 +45,55 @@ export function useWallet() {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: "Wallet address not found"
+        description: "Wallet address not found",
       });
       return;
     }
 
     try {
       setIsAuthenticating(true);
-      console.log('Starting authentication for address:', address);
+      console.log("Starting authentication for address:", address);
 
       // Get challenge
       const challenge = await getWeb3Challenge(address);
-      console.log('Received challenge:', challenge);
+      console.log("Received challenge:", challenge);
 
       // Sign challenge
-      const signature = await signMessageAsync({ 
-        message: challenge.code
+      const signature = await signMessageAsync({
+        message: JSON.stringify(challenge),
       });
-      console.log('Message signed:', { signature });
+      console.log("Message signed:", { signature });
 
       // Login with signature
       const { accessToken } = await web3Login({
         address,
         signature,
-        chain: 'ethereum'
+        chain: "ethereum",
       });
 
       // Store token
-      localStorage.setItem('auth_token', accessToken);
+      localStorage.setItem("auth_token", accessToken);
 
       toast({
         title: "Authentication Successful",
-        description: "Your wallet is now connected and authenticated"
+        description: "Your wallet is now connected and authenticated",
       });
     } catch (error: any) {
-      console.error('Authentication failed:', error);
+      console.error("Authentication failed:", error);
 
       // Extract the most user-friendly error message
-      const errorMessage = error.message?.includes('Authentication failed:') 
-        ? error.message 
-        : 'Failed to authenticate wallet. Please try again.';
+      const errorMessage = error.message?.includes("Authentication failed:")
+        ? error.message
+        : "Failed to authenticate wallet. Please try again.";
 
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: errorMessage
+        description: errorMessage,
       });
 
       // Clean up any partial authentication state
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem("auth_token");
     } finally {
       setIsAuthenticating(false);
     }
@@ -102,36 +102,36 @@ export function useWallet() {
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem("auth_token");
       toast({
         title: "Wallet Disconnected",
-        description: "Your wallet has been disconnected"
+        description: "Your wallet has been disconnected",
       });
     } catch (error) {
-      console.error('Disconnect error:', error);
+      console.error("Disconnect error:", error);
       toast({
         variant: "destructive",
         title: "Disconnect Error",
-        description: "Failed to disconnect wallet"
+        description: "Failed to disconnect wallet",
       });
     }
   }, [disconnectAsync, toast]);
 
   const state: WalletState = {
     status: isAuthenticating
-      ? 'authenticating'
+      ? "authenticating"
       : isConnecting || isReconnecting
-      ? 'connecting'
-      : isConnected
-      ? 'connected'
-      : 'disconnected',
-    address: address ?? null
+        ? "connecting"
+        : isConnected
+          ? "connected"
+          : "disconnected",
+    address: address ?? null,
   };
 
   return {
     ...state,
     connect,
     authenticate,
-    disconnect
+    disconnect,
   };
 }

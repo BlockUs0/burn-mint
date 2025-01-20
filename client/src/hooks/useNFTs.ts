@@ -4,18 +4,21 @@ import { useQuery } from '@tanstack/react-query';
 import { NFT } from '@/types';
 import alchemyService from '@/services/alchemy';
 import { useToast } from '@/hooks/use-toast';
+import { useNetwork } from '@/lib/web3Provider';
 
 export function useNFTs() {
   const { address, status } = useWallet();
+  const { chain } = useNetwork();
   const [selectedNFT, setSelectedNFT] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { data: nfts = [], isLoading: loading, error } = useQuery({
-    queryKey: ['nfts', address],
+    queryKey: ['nfts', address, chain?.id],
     queryFn: async () => {
       try {
         if (!address) throw new Error('No wallet connected');
-        return await alchemyService.getNFTsForOwner(address);
+        if (!chain?.id) throw new Error('No chain selected');
+        return await alchemyService.getNFTsForOwner(address, chain.id);
       } catch (error) {
         console.error('Error fetching NFTs:', error);
         toast({
@@ -26,7 +29,7 @@ export function useNFTs() {
         return [];
       }
     },
-    enabled: status === 'connected' && !!address,
+    enabled: status === 'connected' && !!address && !!chain?.id,
     retry: 1,
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
