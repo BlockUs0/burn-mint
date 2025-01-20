@@ -7,6 +7,7 @@ import {
   WalletClient,
   Address,
   Hash,
+  SwitchChainError,
 } from "viem";
 import { mainnet } from "viem/chains";
 
@@ -84,6 +85,20 @@ class NFTService {
     return { client: this.walletClient, account };
   }
 
+  private async ensureCorrectChain(client: WalletClient) {
+    try {
+      const chainId = await client.getChainId();
+      if (chainId !== mainnet.id) {
+        await client.switchChain({ id: mainnet.id });
+      }
+    } catch (error) {
+      if (error instanceof SwitchChainError) {
+        throw new Error("Please switch to Ethereum Mainnet to burn NFTs");
+      }
+      throw error;
+    }
+  }
+
   async getNFTs(address: Address) {
     try {
       // Get token IDs owned by address
@@ -126,10 +141,13 @@ class NFTService {
     try {
       const { client, account } = await this.getWalletClient();
 
-      console.log("::::>", account);
       if (!account) {
         throw new Error("No wallet detected");
       }
+
+      // Ensure user is on correct chain before proceeding
+      await this.ensureCorrectChain(client);
+
       // Perform burn by sending to zero address
       const hash = await client.writeContract({
         address: NFT_CONTRACT_ADDRESS,
@@ -143,6 +161,9 @@ class NFTService {
       return hash;
     } catch (error) {
       console.error("Error burning NFT:", error);
+      if (error instanceof Error) {
+        throw error; // Preserve the original error message
+      }
       throw new Error("Failed to burn NFT");
     }
   }
