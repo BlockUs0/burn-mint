@@ -5,15 +5,16 @@ import { motion } from "framer-motion";
 
 interface BurnButtonProps {
   tokenId: string;
+  tokenAddress: string;
   disabled?: boolean;
 }
 
-export function BurnButton({ tokenId, disabled }: BurnButtonProps) {
+export function BurnButton({ tokenId, tokenAddress, disabled }: BurnButtonProps) {
   const { burn, status } = useBurnState();
 
   return (
     <Button
-      onClick={() => burn(tokenId)}
+      onClick={() => burn({ tokenId, tokenAddress })}
       disabled={disabled || status === 'burning'}
       className="w-full bg-red-600 hover:bg-red-700"
     >

@@ -14,15 +14,15 @@ export function useBurnState() {
   const { toast } = useToast();
 
   const { mutate: burn } = useMutation({
-    mutationFn: async (tokenId: string) => {
+    mutationFn: async ({ tokenId, tokenAddress }: { tokenId: string; tokenAddress: string }) => {
       setState(prev => ({ ...prev, status: 'burning' }));
 
       try {
         // Execute burn transaction
-        const txHash = await nftService.burnNFT(tokenId);
+        const txHash = await nftService.burnNFT(tokenAddress, tokenId);
 
         // Register burn with backend
-        await registerBurn({ tokenId, txHash });
+        await registerBurn({ tokenId, tokenAddress, txHash });
 
         setState(prev => ({
           status: 'completed',

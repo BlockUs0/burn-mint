@@ -1,5 +1,6 @@
 export interface NFT {
   tokenId: string;
+  tokenAddress: string; // Add tokenAddress field
   name: string;
   description: string;
   image: string;
@@ -29,6 +30,7 @@ export type BurnState = {
 export interface BurnRecord {
   id: string;
   tokenId: string;
+  tokenAddress: string; // Add tokenAddress field
   txHash: string;
   timestamp: string;
 }

@@ -60,6 +60,7 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
 
           <BurnButton
             tokenId={nft.tokenId}
+            tokenAddress={nft.tokenAddress}
             disabled={!selected}
           />
         </div>
