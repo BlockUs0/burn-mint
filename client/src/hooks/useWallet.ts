@@ -60,7 +60,7 @@ export function useWallet() {
 
       // Sign challenge
       const signature = await signMessageAsync({ 
-        message: challenge 
+        message: challenge.code
       });
       console.log('Message signed:', { signature });
 
