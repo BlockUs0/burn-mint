@@ -1,18 +1,16 @@
 
-import { createConfig, WagmiProvider } from 'wagmi';
+import { createConfig, WagmiProvider, useConfig } from 'wagmi';
 import { mainnet, sepolia, goerli } from 'viem/chains';
-import { createPublicClient, http } from 'viem';
+import { http, createConfig as createViemConfig } from 'viem';
 import { injected } from 'wagmi/connectors';
-import { networks } from '@/config/networks';
 
 const chains = [mainnet, sepolia, goerli];
 
 const config = createConfig({
-  chains,
-  transports: chains.reduce((acc, chain) => ({
-    ...acc,
-    [chain.id]: http(),
-  }), {}),
+  chains: chains,
+  transports: Object.fromEntries(
+    chains.map(chain => [chain.id, http()])
+  ),
   connectors: [injected()]
 });
 
@@ -22,4 +20,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       {children}
     </WagmiProvider>
   );
+}
+
+export function useNetwork() {
+  const config = useConfig();
+  return {
+    chain: config.state.chainId ? 
+      chains.find(c => c.id === config.state.chainId) : 
+      chains[0]
+  };
 }

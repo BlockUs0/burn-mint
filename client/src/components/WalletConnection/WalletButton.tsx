@@ -1,6 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Flame, Loader2, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import { Flame, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,11 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useWallet } from "@/hooks/useWallet";
-import { useNetwork, useSwitchNetwork } from "wagmi";
+import { useNetwork } from "@/lib/web3Provider";
+import { useSwitchNetwork } from "wagmi";
 import { networks } from "@/config/networks";
 
 export function WalletButton() {
-  const { status, address, connect, authenticate, disconnect } = useWallet();
+  const { status, address, connect, disconnect } = useWallet();
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
 
@@ -26,11 +27,12 @@ export function WalletButton() {
   }
 
   if (status === 'connected' && address) {
+    const currentNetwork = networks[chain?.id || 1];
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            {address.slice(0, 6)}...{address.slice(-4)} | {networks[chain?.id || 1].icon}
+          <Button variant="outline" className="min-w-[180px]">
+            {address.slice(0, 6)}...{address.slice(-4)} {currentNetwork?.icon}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -39,9 +41,12 @@ export function WalletButton() {
               key={network.chain.id}
               onClick={() => switchNetwork?.(network.chain.id)}
             >
-              {network.displayName}
+              {network.icon} {network.displayName}
             </DropdownMenuItem>
           ))}
+          <DropdownMenuItem onClick={disconnect}>
+            Disconnect
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );

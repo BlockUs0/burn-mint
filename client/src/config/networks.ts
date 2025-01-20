@@ -1,30 +1,24 @@
 
-import { Chain, mainnet, sepolia, goerli } from "viem/chains";
+import { mainnet, sepolia, goerli } from 'viem/chains';
 
-export type NetworkConfig = {
-  chain: Chain;
-  alchemyUrl: string;
-  displayName: string;
-  icon: string;
-};
-
-export const networks: Record<number, NetworkConfig> = {
+export const networks = {
   [mainnet.id]: {
     chain: mainnet,
-    alchemyUrl: "https://eth-mainnet.g.alchemy.com/v2",
-    displayName: "Ethereum",
-    icon: "ETH",
+    displayName: 'Ethereum',
+    icon: '⟠',
+    alchemyUrl: 'https://eth-mainnet.g.alchemy.com/v2',
   },
   [sepolia.id]: {
     chain: sepolia,
-    alchemyUrl: "https://eth-sepolia.g.alchemy.com/v2",
-    displayName: "Sepolia",
-    icon: "SEP",
+    displayName: 'Sepolia',
+    icon: '🔵',
+    alchemyUrl: 'https://eth-sepolia.g.alchemy.com/v2',
   },
   [goerli.id]: {
     chain: goerli,
-    alchemyUrl: "https://eth-goerli.g.alchemy.com/v2",
-    displayName: "Goerli",
-    icon: "GOR",
+    displayName: 'Goerli',
+    icon: '🟡',
+    alchemyUrl: 'https://eth-goerli.g.alchemy.com/v2',
   },
-};
+} as const;
+
