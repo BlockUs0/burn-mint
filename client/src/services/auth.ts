@@ -75,5 +75,14 @@ export async function web3Login({
 
   const data = await response.json();
   console.log("Login response:", data);
+
+  // Store the access token in localStorage
+  if (data.accessToken) {
+    localStorage.setItem('blockus_access_token', data.accessToken);
+  } else {
+    console.error('No access token received in login response');
+    throw new Error('No access token received');
+  }
+
   return data;
 }

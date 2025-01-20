@@ -103,6 +103,7 @@ export function useWallet() {
     try {
       await disconnectAsync();
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("blockus_access_token"); 
       toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected",
