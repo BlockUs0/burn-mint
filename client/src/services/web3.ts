@@ -7,9 +7,9 @@ import {
   WalletClient,
   Address,
   Hash,
-  SwitchChainError,
+  Chain,
 } from "viem";
-import { mainnet } from "viem/chains";
+import { mainnet, polygon } from "viem/chains";
 
 declare global {
   interface Window {
@@ -22,17 +22,36 @@ export const NFT_CONTRACT_ADDRESS =
 export const ZERO_ADDRESS =
   "0x0000000000000000000000000000000000000000" as Address;
 
-// Create public client for read operations
+// Support multiple chains
+export const SUPPORTED_CHAINS = {
+  mainnet,
+  polygon,
+} as const;
+
+// Create public client that adapts to the current chain
 export const publicClient = createPublicClient({
-  chain: mainnet,
+  chain: polygon, // Default to polygon
   transport: http(),
 });
 
 // Get wallet client for write operations
 export function getWalletClient(): WalletClient {
   if (!window.ethereum) throw new Error("No wallet detected");
+
+  // Get the current chain ID from the wallet
+  const chainId = window.ethereum.chainId;
+
+  // Find matching chain config
+  const chain = Object.values(SUPPORTED_CHAINS).find(
+    (c) => c.id === parseInt(chainId)
+  );
+
+  if (!chain) {
+    throw new Error("Unsupported network. Please connect to Polygon or Ethereum Mainnet");
+  }
+
   return createWalletClient({
-    chain: mainnet,
+    chain,
     transport: custom(window.ethereum),
   });
 }
@@ -85,20 +104,6 @@ class NFTService {
     return { client: this.walletClient, account };
   }
 
-  private async ensureCorrectChain(client: WalletClient) {
-    try {
-      const chainId = await client.getChainId();
-      if (chainId !== mainnet.id) {
-        await client.switchChain({ id: mainnet.id });
-      }
-    } catch (error) {
-      if (error instanceof SwitchChainError) {
-        throw new Error("Please switch to Ethereum Mainnet to burn NFTs");
-      }
-      throw error;
-    }
-  }
-
   async getNFTs(address: Address) {
     try {
       // Get token IDs owned by address
@@ -144,6 +149,7 @@ class NFTService {
       if (!account) {
         throw new Error("No wallet detected");
       }
+      console.log(">>>>>>", client);
 
       // Perform burn by sending to zero address
       const hash = await client.writeContract({
