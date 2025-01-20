@@ -19,7 +19,6 @@ export function useBurnState() {
       setState(prev => ({ ...prev, status: 'burning' }));
 
       try {
-        // Execute burn transaction
         const txHash = await nftService.burnNFT(tokenAddress, tokenId);
 
         // Register burn with backend

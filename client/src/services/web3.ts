@@ -35,12 +35,12 @@ async function getCurrentChain(): Promise<Chain> {
   const chainId = parseInt(window.ethereum.chainId);
 
   // Find matching chain config
-  const chain = Object.values(SUPPORTED_CHAINS).find(
-    (c) => c.id === chainId
-  );
+  const chain = Object.values(SUPPORTED_CHAINS).find((c) => c.id === chainId);
 
   if (!chain) {
-    throw new Error("Please connect to a supported network (chainId: 1 or 137)");
+    throw new Error(
+      "Please connect to a supported network (chainId: 1 or 137)",
+    );
   }
 
   return chain;
@@ -56,7 +56,10 @@ export async function getPublicClient(): Promise<PublicClient> {
 }
 
 // Get wallet client for write operations
-export async function getWalletClient(): Promise<{ client: WalletClient; account: Address }> {
+export async function getWalletClient(): Promise<{
+  client: WalletClient;
+  account: Address;
+}> {
   if (!window.ethereum) throw new Error("No wallet detected");
 
   const chain = await getCurrentChain();
@@ -137,7 +140,7 @@ class NFTService {
 
           return {
             tokenId: tokenId.toString(),
-            tokenAddress: NFT_CONTRACT_ADDRESS, // Add contract address to NFT data
+            tokenAddress: NFT_CONTRACT_ADDRESS,
             name: metadata.name,
             description: metadata.description,
             image: metadata.image,
@@ -156,11 +159,7 @@ class NFTService {
     try {
       const { client, account } = await getWalletClient();
 
-      if (!account) {
-        throw new Error("No wallet detected");
-      }
-
-      // Validate inputs
+      console.log(tokenAddress, tokenId);
       if (!tokenAddress || !tokenId) {
         throw new Error("Invalid token address or token ID");
       }
@@ -181,7 +180,8 @@ class NFTService {
           "0x000000000000000000000000000000000000dEaD" as Address,
           BigInt(tokenId),
         ],
-        account, // Add account to writeContract options
+        account,
+        chain: client.chain,
       });
 
       return hash;

@@ -9,25 +9,26 @@ interface BurnButtonProps {
   disabled?: boolean;
 }
 
-export function BurnButton({ tokenId, tokenAddress, disabled }: BurnButtonProps) {
+export function BurnButton({
+  tokenId,
+  tokenAddress,
+  disabled,
+}: BurnButtonProps) {
   const { burn, status } = useBurnState();
-
+  console.log(">>>>>>", tokenId, tokenAddress);
   return (
     <Button
       onClick={() => burn({ tokenId, tokenAddress })}
-      disabled={disabled || status === 'burning'}
+      disabled={disabled || status === "burning"}
       className="w-full bg-red-600 hover:bg-red-700"
     >
-      {status === 'burning' ? (
+      {status === "burning" ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Burning...
         </>
       ) : (
-        <motion.div 
-          className="flex items-center"
-          whileHover={{ scale: 1.05 }}
-        >
+        <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
           <Flame className="mr-2 h-4 w-4" />
           Burn NFT
         </motion.div>

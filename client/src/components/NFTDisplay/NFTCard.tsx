@@ -12,32 +12,31 @@ interface NFTCardProps {
 }
 
 export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
+  console.log("nft >>>>>> ", nft);
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <Card 
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <Card
         className={`
           relative overflow-hidden cursor-pointer
-          ${selected ? 'ring-2 ring-primary' : ''}
+          ${selected ? "ring-2 ring-primary" : ""}
         `}
         onClick={onSelect}
       >
         {selected && <FireParticles />}
 
         <div className="aspect-square relative">
-          <img 
-            src={nft.image} 
+          <img
+            src={nft.image}
             alt={nft.name}
             className="object-cover w-full h-full rounded-t-lg"
             onError={(e) => {
-              e.currentTarget.src = 'https://placehold.co/200x200/orange/white?text=NFT';
+              e.currentTarget.src =
+                "https://placehold.co/200x200/orange/white?text=NFT";
             }}
           />
-          {nft.tokenType === 'ERC1155' && nft.balance && (
-            <Badge 
-              variant="secondary" 
+          {nft.tokenType === "ERC1155" && nft.balance && (
+            <Badge
+              variant="secondary"
               className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
             >
               x{nft.balance}
@@ -51,7 +50,7 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
               {nft.name || `NFT #${nft.tokenId}`}
             </h3>
             <Badge variant="outline" className="text-xs">
-              {nft.tokenType || 'ERC721'}
+              {nft.tokenType || "ERC721"}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">

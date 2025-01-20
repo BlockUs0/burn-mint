@@ -106,6 +106,7 @@ export async function getNFTsForOwner(
       } else if (nft.rawMetadata?.image) {
         imageUrl = nft.rawMetadata.image;
       }
+      console.log(nft);
       const mappedNFT = {
         tokenId: nft.id.tokenId,
         name: nft.name || nft.title || `NFT #${nft.tokenId}`,
@@ -115,6 +116,7 @@ export async function getNFTsForOwner(
           "No description available",
         image: sanitizeImageUrl(imageUrl),
         tokenType: nft.contractMetadata.tokenType,
+        tokenAddress: nft.contract.address,
       };
 
       return mappedNFT;
