@@ -24,36 +24,49 @@ export const ZERO_ADDRESS =
 
 // Support multiple chains
 export const SUPPORTED_CHAINS = {
-  mainnet,
-  polygon,
+  MAINNET: mainnet,
+  POLYGON: polygon,
 } as const;
 
-// Create public client that adapts to the current chain
-export const publicClient = createPublicClient({
-  chain: polygon, // Default to polygon
-  transport: http(),
-});
-
-// Get wallet client for write operations
-export function getWalletClient(): WalletClient {
+// Function to get the current chain from ethereum provider
+async function getCurrentChain(): Promise<Chain> {
   if (!window.ethereum) throw new Error("No wallet detected");
 
-  // Get the current chain ID from the wallet
-  const chainId = window.ethereum.chainId;
+  const chainId = parseInt(window.ethereum.chainId);
 
   // Find matching chain config
   const chain = Object.values(SUPPORTED_CHAINS).find(
-    (c) => c.id === parseInt(chainId)
+    (c) => c.id === chainId
   );
 
   if (!chain) {
-    throw new Error("Unsupported network. Please connect to Polygon or Ethereum Mainnet");
+    throw new Error("Please connect to a supported network (chainId: 1 or 137)");
   }
 
-  return createWalletClient({
+  return chain;
+}
+
+// Create public client that adapts to the current chain
+export async function getPublicClient(): Promise<PublicClient> {
+  const chain = await getCurrentChain();
+  return createPublicClient({
+    chain,
+    transport: http(),
+  });
+}
+
+// Get wallet client for write operations
+export async function getWalletClient(): Promise<{ client: WalletClient; account: Address }> {
+  if (!window.ethereum) throw new Error("No wallet detected");
+
+  const chain = await getCurrentChain();
+  const client = createWalletClient({
     chain,
     transport: custom(window.ethereum),
   });
+
+  const [account] = await client.requestAddresses();
+  return { client, account };
 }
 
 export const NFT_ABI = [
@@ -92,22 +105,18 @@ export const NFT_ABI = [
 ] as const;
 
 class NFTService {
-  private walletClient: WalletClient | null = null;
+  constructor() {}
 
-  constructor(private readonly publicClient: PublicClient) {}
-
-  private async getWalletClient() {
-    if (!this.walletClient) {
-      this.walletClient = getWalletClient();
-    }
-    const [account] = await this.walletClient.requestAddresses();
-    return { client: this.walletClient, account };
+  private async getClient() {
+    return getPublicClient();
   }
 
   async getNFTs(address: Address) {
     try {
+      const client = await this.getClient();
+
       // Get token IDs owned by address
-      const tokenIds = await this.publicClient.readContract({
+      const tokenIds = await client.readContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_ABI,
         functionName: "tokensOfOwner",
@@ -117,7 +126,7 @@ class NFTService {
       // Fetch metadata for each token
       const nfts = await Promise.all(
         tokenIds.map(async (tokenId) => {
-          const uri = await this.publicClient.readContract({
+          const uri = await client.readContract({
             address: NFT_CONTRACT_ADDRESS,
             abi: NFT_ABI,
             functionName: "tokenURI",
@@ -144,21 +153,28 @@ class NFTService {
 
   async burnNFT(tokenAddress: Address, tokenId: string): Promise<Hash> {
     try {
-      const { client, account } = await this.getWalletClient();
+      const { client, account } = await getWalletClient();
 
       if (!account) {
         throw new Error("No wallet detected");
       }
-      console.log(">>>>>>", client);
 
-      // Perform burn by sending to zero address
+      // Log chain information for debugging
+      console.log("Current Chain:", client.chain);
+      console.log("Account:", account);
+      console.log("Token Address:", tokenAddress);
+      console.log("Token ID:", tokenId);
+
+      // Perform burn by sending to dead address
       const hash = await client.writeContract({
         address: tokenAddress,
         abi: NFT_ABI,
         functionName: "transferFrom",
-        args: [account, ZERO_ADDRESS, BigInt(tokenId)],
-        account,
-        chain: client.chain,
+        args: [
+          account,
+          "0x000000000000000000000000000000000000dEaD" as Address,
+          BigInt(tokenId),
+        ],
       });
 
       return hash;
@@ -190,5 +206,5 @@ async function parseTokenUri(uri: string) {
 }
 
 // Initialize and export default instance
-const nftService = new NFTService(publicClient);
+const nftService = new NFTService();
 export default nftService;
