@@ -18,7 +18,12 @@ export function useNFTs() {
       try {
         if (!address) throw new Error('No wallet connected');
         if (!chain?.id) throw new Error('No chain selected');
-        return await alchemyService.getNFTsForOwner(address, chain.id);
+        const fetchedNFTs = await alchemyService.getNFTsForOwner(address, chain.id);
+        // Ensure each NFT has a unique tokenId
+        return fetchedNFTs.map(nft => ({
+          ...nft,
+          tokenId: nft.tokenId.toString() // Ensure tokenId is a string
+        }));
       } catch (error) {
         console.error('Error fetching NFTs:', error);
         toast({
@@ -31,7 +36,7 @@ export function useNFTs() {
     },
     enabled: status === 'connected' && !!address && !!chain?.id,
     retry: 1,
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 30000,
   });
 
   // Reset selection when wallet disconnects
@@ -41,11 +46,15 @@ export function useNFTs() {
     }
   }, [status]);
 
+  const selectNFT = (tokenId: string) => {
+    setSelectedNFT(prev => prev === tokenId ? null : tokenId);
+  };
+
   return {
     nfts,
     loading,
     error,
     selectedNFT,
-    selectNFT: setSelectedNFT
+    selectNFT
   };
 }

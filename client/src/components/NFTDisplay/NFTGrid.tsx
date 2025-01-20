@@ -16,8 +16,8 @@ export function NFTGrid() {
           </span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="aspect-square rounded-lg" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={`skeleton-${i}`} className="aspect-square rounded-lg" />
           ))}
         </div>
       </div>
@@ -40,7 +40,7 @@ export function NFTGrid() {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {nfts.map((nft) => (
         <NFTCard
-          key={nft.tokenId}
+          key={`nft-${nft.tokenId}`}
           nft={nft}
           selected={selectedNFT === nft.tokenId}
           onSelect={() => selectNFT(nft.tokenId)}
