@@ -1,4 +1,13 @@
-import { createPublicClient, createWalletClient, custom, http, PublicClient, WalletClient, Address, Hash } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  custom,
+  http,
+  PublicClient,
+  WalletClient,
+  Address,
+  Hash,
+} from "viem";
 import { mainnet } from "viem/chains";
 
 declare global {
@@ -7,8 +16,10 @@ declare global {
   }
 }
 
-export const NFT_CONTRACT_ADDRESS = "0x85be9de7a369850a964616a2c04d79000d168dea" as Address;
-export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as Address;
+export const NFT_CONTRACT_ADDRESS =
+  "0x85be9de7a369850a964616a2c04d79000d168dea" as Address;
+export const ZERO_ADDRESS =
+  "0x0000000000000000000000000000000000000000" as Address;
 
 // Create public client for read operations
 export const publicClient = createPublicClient({
@@ -27,45 +38,43 @@ export function getWalletClient(): WalletClient {
 
 export const NFT_ABI = [
   {
-    "inputs": [{"internalType": "address","name": "owner","type": "address"}],
-    "name": "tokensOfOwner",
-    "outputs": [{"internalType": "uint256[]","name": "","type": "uint256[]"}],
-    "stateMutability": "view",
-    "type": "function"
+    inputs: [{ internalType: "address", name: "owner", type: "address" }],
+    name: "tokensOfOwner",
+    outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "inputs": [{"internalType": "uint256","name": "tokenId","type": "uint256"}],
-    "name": "tokenURI",
-    "outputs": [{"internalType": "string","name": "","type": "string"}],
-    "stateMutability": "view",
-    "type": "function"
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "tokenURI",
+    outputs: [{ internalType: "string", name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "inputs": [{"internalType": "uint256","name": "tokenId","type": "uint256"}],
-    "name": "ownerOf",
-    "outputs": [{"internalType": "address","name": "","type": "address"}],
-    "stateMutability": "view",
-    "type": "function"
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "ownerOf",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "name": "transferFrom",
-    "type": "function",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      {"name": "from","type": "address"},
-      {"name": "to","type": "address"},
-      {"name": "tokenId","type": "uint256"}
+    name: "transferFrom",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+      { name: "tokenId", type: "uint256" },
     ],
-    "outputs": []
-  }
+    outputs: [],
+  },
 ] as const;
 
 class NFTService {
   private walletClient: WalletClient | null = null;
 
-  constructor(
-    private readonly publicClient: PublicClient,
-  ) {}
+  constructor(private readonly publicClient: PublicClient) {}
 
   private async getWalletClient() {
     if (!this.walletClient) {
@@ -103,13 +112,13 @@ class NFTService {
             description: metadata.description,
             image: metadata.image,
           };
-        })
+        }),
       );
 
       return nfts;
     } catch (error) {
-      console.error('Error fetching NFTs:', error);
-      throw new Error('Failed to fetch NFTs');
+      console.error("Error fetching NFTs:", error);
+      throw new Error("Failed to fetch NFTs");
     }
   }
 
@@ -126,27 +135,23 @@ class NFTService {
       });
 
       if (ownerAddress.toLowerCase() !== account.toLowerCase()) {
-        throw new Error('You do not own this NFT');
+        throw new Error("You do not own this NFT");
       }
 
       // Perform burn by sending to zero address
       const hash = await client.writeContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_ABI,
-        functionName: 'transferFrom',
-        args: [
-          ownerAddress,
-          ZERO_ADDRESS,
-          BigInt(tokenId)
-        ],
+        functionName: "transferFrom",
+        args: [ownerAddress, ZERO_ADDRESS, BigInt(tokenId)],
         account,
         chain: mainnet,
       });
 
       return hash;
     } catch (error) {
-      console.error('Error burning NFT:', error);
-      throw new Error('Failed to burn NFT');
+      console.error("Error burning NFT:", error);
+      throw new Error("Failed to burn NFT");
     }
   }
 }
@@ -154,27 +159,20 @@ class NFTService {
 async function parseTokenUri(uri: string) {
   try {
     // Handle IPFS URIs
-    const url = uri.startsWith('ipfs://')
+    const url = uri.startsWith("ipfs://")
       ? `https://ipfs.io/ipfs/${uri.slice(7)}`
       : uri;
 
     const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch metadata');
+    if (!response.ok) throw new Error("Failed to fetch metadata");
 
     return await response.json();
   } catch (error) {
-    console.error('Error parsing token URI:', error);
-    throw new Error('Failed to parse token metadata');
+    console.error("Error parsing token URI:", error);
+    throw new Error("Failed to parse token metadata");
   }
 }
 
 // Initialize and export default instance
 const nftService = new NFTService(publicClient);
 export default nftService;
-
-interface NFT {
-  tokenId: string;
-  name: string;
-  description: string;
-  image: string;
-}
