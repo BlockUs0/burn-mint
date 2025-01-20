@@ -1,11 +1,14 @@
 import { NFT } from "@/types";
+import { networks } from "@/config/networks";
+import { useNetwork } from "wagmi";
 
-const ALCHEMY_BASE_URL = "https://eth-mainnet.g.alchemy.com/nft/v3";
 const ALCHEMY_API_KEY = "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
 const NFT_CONTRACT_ADDRESS = "0x85be9de7a369850a964616a2c04d79000d168dea";
 
-const RETRY_COUNT = 3;
-const INITIAL_RETRY_DELAY = 1000; // 1 second
+function getAlchemyBaseUrl(chainId: number) {
+  const network = networks[chainId];
+  return `${network.alchemyUrl}/${ALCHEMY_API_KEY}`;
+}
 
 function sanitizeImageUrl(url: string): string {
   if (!url) return "";
@@ -23,7 +26,7 @@ function sanitizeImageUrl(url: string): string {
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
-  retryCount = RETRY_COUNT,
+  retryCount = 3,
 ): Promise<Response> {
   try {
     const response = await fetch(url, options);
@@ -35,7 +38,7 @@ async function fetchWithRetry(
       // Check if it's a rate limit error
       if (errorJson.error?.message?.includes("rate limits") && retryCount > 0) {
         // Calculate delay with exponential backoff
-        const delay = INITIAL_RETRY_DELAY * (RETRY_COUNT - retryCount + 1);
+        const delay = 1000 * (3 - retryCount + 1);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return fetchWithRetry(url, options, retryCount - 1);
       }
@@ -46,7 +49,7 @@ async function fetchWithRetry(
     return response;
   } catch (error) {
     if (retryCount > 0) {
-      const delay = INITIAL_RETRY_DELAY * (RETRY_COUNT - retryCount + 1);
+      const delay = 1000 * (3 - retryCount + 1);
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retryCount - 1);
     }
@@ -54,11 +57,10 @@ async function fetchWithRetry(
   }
 }
 
-export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
+export async function getNFTsForOwner(ownerAddress: string, chainId: number): Promise<NFT[]> {
   try {
-    const url = new URL(
-      `${ALCHEMY_BASE_URL}/${ALCHEMY_API_KEY}/getNFTsForOwner`,
-    );
+    const baseUrl = getAlchemyBaseUrl(chainId);
+    const url = new URL(`${baseUrl}/getNFTsForOwner`);
     url.searchParams.append("owner", ownerAddress);
     url.searchParams.append("withMetadata", "true");
     url.searchParams.append("contractAddresses[]", NFT_CONTRACT_ADDRESS);
@@ -117,7 +119,6 @@ export async function getNFTsForOwner(ownerAddress: string): Promise<NFT[]> {
   }
 }
 
-// Create and export default instance for consistency
 const alchemyService = {
   getNFTsForOwner,
 };

@@ -1,16 +1,18 @@
+
 import { createConfig, WagmiProvider } from 'wagmi';
-import { mainnet } from 'viem/chains';
+import { mainnet, sepolia, goerli } from 'viem/chains';
 import { createPublicClient, http } from 'viem';
 import { injected } from 'wagmi/connectors';
+import { networks } from '@/config/networks';
 
-// Configure wagmi for Ethereum mainnet with MetaMask only
+const chains = [mainnet, sepolia, goerli];
+
 const config = createConfig({
-  chains: [mainnet],
-  client: ({ chain }) =>
-    createPublicClient({
-      chain,
-      transport: http(),
-    }),
+  chains,
+  transports: chains.reduce((acc, chain) => ({
+    ...acc,
+    [chain.id]: http(),
+  }), {}),
   connectors: [injected()]
 });
 
