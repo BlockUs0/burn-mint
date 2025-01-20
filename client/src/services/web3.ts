@@ -126,24 +126,16 @@ class NFTService {
     try {
       const { client, account } = await this.getWalletClient();
 
-      // Verify ownership
-      const ownerAddress = await this.publicClient.readContract({
-        address: NFT_CONTRACT_ADDRESS,
-        abi: NFT_ABI,
-        functionName: "ownerOf",
-        args: [BigInt(tokenId)],
-      });
-
-      if (ownerAddress.toLowerCase() !== account.toLowerCase()) {
-        throw new Error("You do not own this NFT");
+      console.log("::::>", account);
+      if (!account) {
+        throw new Error("No wallet detected");
       }
-
       // Perform burn by sending to zero address
       const hash = await client.writeContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_ABI,
         functionName: "transferFrom",
-        args: [ownerAddress, ZERO_ADDRESS, BigInt(tokenId)],
+        args: [account, ZERO_ADDRESS, BigInt(tokenId)],
         account,
         chain: mainnet,
       });

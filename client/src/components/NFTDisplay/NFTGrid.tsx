@@ -17,7 +17,10 @@ export function NFTGrid() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={`skeleton-${i}`} className="aspect-square rounded-lg" />
+            <Skeleton
+              key={`skeleton-${i}`}
+              className="aspect-square rounded-lg"
+            />
           ))}
         </div>
       </div>
@@ -30,7 +33,8 @@ export function NFTGrid() {
         <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
         <h3 className="text-lg font-semibold mb-2">No NFTs Found</h3>
         <p className="text-muted-foreground max-w-md">
-          You don't own any NFTs from this collection yet. Once you acquire NFTs, they will appear here ready for transformation.
+          You don't own any NFTs from this collection yet. Once you acquire
+          NFTs, they will appear here ready for transformation.
         </p>
       </div>
     );
@@ -38,14 +42,16 @@ export function NFTGrid() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {nfts.map((nft) => (
-        <NFTCard
-          key={`nft-${nft.tokenId}`}
-          nft={nft}
-          selected={selectedNFT === nft.tokenId}
-          onSelect={() => selectNFT(nft.tokenId)}
-        />
-      ))}
+      {nfts
+        .filter(nft => nft.tokenType !== "ERC1155")
+        .map((nft) => (
+          <NFTCard
+            key={`nft-${nft.tokenId}`}
+            nft={nft}
+            selected={selectedNFT === nft.tokenId}
+            onSelect={() => selectNFT(nft.tokenId)}
+          />
+        ))}
     </div>
   );
 }
