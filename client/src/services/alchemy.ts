@@ -82,7 +82,6 @@ export async function getNFTsForOwner(
     const url = new URL(`${baseUrl}/getNFTsForOwner`);
     url.searchParams.append("owner", ownerAddress);
     url.searchParams.append("withMetadata", "true");
-    // url.searchParams.append("contractAddresses[]", networks[chainId].nftContractAddress);
 
     const response = await fetchWithRetry(url.toString(), {
       headers: {
@@ -91,17 +90,18 @@ export async function getNFTsForOwner(
     });
 
     const data = await response.json();
+
     // Transform and log each NFT's data
     return data.ownedNfts.map((nft: any) => {
       console.log("Processing NFT:", {
         id: nft.tokenId,
         title: nft.title,
+        tokenType: nft.tokenMetadata?.tokenType,
         rawName: nft.rawMetadata?.name,
         image: {
           media: nft.media?.[0]?.gateway,
           rawImage: nft.rawMetadata?.image,
           tokenUri: nft.tokenUri?.gateway,
-          raw: nft.rawMetadata,
         },
       });
 
@@ -109,11 +109,7 @@ export async function getNFTsForOwner(
       let imageUrl = "";
 
       // Try different possible image locations in order of preference
-      if (nft.image?.cachedUrl) {
-        imageUrl = nft.image.cachedUrl;
-      } else if (nft.image?.thumbnailUrl) {
-        imageUrl = nft.image.thumbnailUrl;
-      } else if (nft.media?.[0]?.gateway) {
+      if (nft.media?.[0]?.gateway) {
         imageUrl = nft.media[0].gateway;
       } else if (nft.rawMetadata?.image) {
         imageUrl = nft.rawMetadata.image;
@@ -121,12 +117,14 @@ export async function getNFTsForOwner(
 
       const mappedNFT = {
         tokenId: nft.tokenId,
-        name: nft.name || nft.title || `NFT #${nft.tokenId}`,
+        name: nft.title || nft.rawMetadata?.name || `NFT #${nft.tokenId}`,
         description:
           nft.description ||
           nft.rawMetadata?.description ||
           "No description available",
         image: sanitizeImageUrl(imageUrl),
+        tokenType: nft.tokenMetadata?.tokenType || 'ERC721',
+        balance: nft.balance || '1'
       };
 
       console.log("Mapped NFT:", mappedNFT);

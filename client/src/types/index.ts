@@ -3,6 +3,8 @@ export interface NFT {
   name: string;
   description: string;
   image: string;
+  tokenType?: 'ERC721' | 'ERC1155';
+  balance?: string;
 }
 
 export type WalletState = {

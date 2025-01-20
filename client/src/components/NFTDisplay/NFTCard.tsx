@@ -3,6 +3,7 @@ import { NFT } from "@/types";
 import { motion } from "framer-motion";
 import { FireParticles } from "../animations/FireParticles";
 import { BurnButton } from "../BurnInterface/BurnButton";
+import { Badge } from "@/components/ui/badge";
 
 interface NFTCardProps {
   nft: NFT;
@@ -34,12 +35,25 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
               e.currentTarget.src = 'https://placehold.co/200x200/orange/white?text=NFT';
             }}
           />
+          {nft.tokenType === 'ERC1155' && nft.balance && (
+            <Badge 
+              variant="secondary" 
+              className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+            >
+              x{nft.balance}
+            </Badge>
+          )}
         </div>
 
         <div className="p-3">
-          <h3 className="font-semibold text-sm truncate mb-1">
-            {nft.name || `NFT #${nft.tokenId}`}
-          </h3>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-semibold text-sm truncate">
+              {nft.name || `NFT #${nft.tokenId}`}
+            </h3>
+            <Badge variant="outline" className="text-xs">
+              {nft.tokenType || 'ERC721'}
+            </Badge>
+          </div>
           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
             {nft.description}
           </p>
