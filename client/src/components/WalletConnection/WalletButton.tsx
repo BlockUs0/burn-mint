@@ -13,7 +13,7 @@ import { networks } from "@/config/networks";
 import { useToast } from "@/hooks/use-toast";
 
 export function WalletButton() {
-  const { status, address, connect, disconnect } = useWallet();
+  const { status, address, connect, disconnect, authenticate } = useWallet();
   const { chain, isSupported } = useNetwork();
   const { switchChain } = useSwitchChain();
   const { toast } = useToast();
@@ -83,13 +83,26 @@ export function WalletButton() {
     );
   }
 
+  // Not connected - show connect/authenticate buttons
+  if (status === 'disconnected') {
+    return (
+      <Button 
+        onClick={connect}
+        className="min-w-[180px] bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+      >
+        <Flame className="mr-2 h-4 w-4" />
+        Connect Wallet
+      </Button>
+    );
+  }
+
+  // Connected but not authenticated
   return (
     <Button 
-      onClick={connect}
+      onClick={authenticate}
       className="min-w-[180px] bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
     >
-      <Flame className="mr-2 h-4 w-4" />
-      Connect Wallet
+      Authenticate Wallet
     </Button>
   );
 }
