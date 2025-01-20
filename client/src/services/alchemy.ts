@@ -1,7 +1,12 @@
 import { NFT } from "@/types";
-import { networks, type SupportedChainId, isChainSupported } from "@/config/networks";
+import {
+  networks,
+  type SupportedChainId,
+  isChainSupported,
+} from "@/config/networks";
 
-const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
+const ALCHEMY_API_KEY =
+  import.meta.env.VITE_ALCHEMY_API_KEY || "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
 
 function getAlchemyBaseUrl(chainId: number): string {
   if (!isChainSupported(chainId)) {
@@ -63,7 +68,10 @@ async function fetchWithRetry(
   }
 }
 
-export async function getNFTsForOwner(ownerAddress: string, chainId: number): Promise<NFT[]> {
+export async function getNFTsForOwner(
+  ownerAddress: string,
+  chainId: number,
+): Promise<NFT[]> {
   try {
     // Validate chain ID before proceeding
     if (!isChainSupported(chainId)) {
@@ -74,7 +82,7 @@ export async function getNFTsForOwner(ownerAddress: string, chainId: number): Pr
     const url = new URL(`${baseUrl}/getNFTsForOwner`);
     url.searchParams.append("owner", ownerAddress);
     url.searchParams.append("withMetadata", "true");
-    url.searchParams.append("contractAddresses[]", networks[chainId].nftContractAddress);
+    // url.searchParams.append("contractAddresses[]", networks[chainId].nftContractAddress);
 
     const response = await fetchWithRetry(url.toString(), {
       headers: {
