@@ -27,7 +27,8 @@ export function WalletButton() {
     );
   }
 
-  if (status === 'connected' && address) {
+  // If connected and authenticated, show network switcher
+  if (status === 'connected' && address && localStorage.getItem('auth_token')) {
     const currentNetwork = chain?.id ? networks[chain.id] : networks[1];
 
     // Show warning if on unsupported network
@@ -83,7 +84,7 @@ export function WalletButton() {
     );
   }
 
-  // Not connected - show connect/authenticate buttons
+  // Not connected - show connect button
   if (status === 'disconnected') {
     return (
       <Button 
