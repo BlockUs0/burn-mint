@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Flame, Loader2 } from "lucide-react";
 import {
@@ -9,13 +8,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useWallet } from "@/hooks/useWallet";
 import { useNetwork } from "@/lib/web3Provider";
-import { useSwitchNetwork } from "wagmi";
+import { useSwitchChain } from "wagmi";
 import { networks } from "@/config/networks";
 
 export function WalletButton() {
   const { status, address, connect, disconnect } = useWallet();
   const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const { switchChain } = useSwitchChain();
 
   if (status === 'connecting' || status === 'authenticating') {
     return (
@@ -39,7 +38,11 @@ export function WalletButton() {
           {Object.values(networks).map((network) => (
             <DropdownMenuItem
               key={network.chain.id}
-              onClick={() => switchNetwork?.(network.chain.id)}
+              onClick={() => {
+                if (switchChain) {
+                  switchChain({ chainId: network.chain.id });
+                }
+              }}
             >
               {network.icon} {network.displayName}
             </DropdownMenuItem>

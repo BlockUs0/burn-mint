@@ -1,16 +1,17 @@
-
 import { createConfig, WagmiProvider, useConfig } from 'wagmi';
 import { mainnet, sepolia, goerli } from 'viem/chains';
-import { http, createConfig as createViemConfig } from 'viem';
+import { http } from 'viem';
 import { injected } from 'wagmi/connectors';
 
-const chains = [mainnet, sepolia, goerli];
+const chains = [mainnet, sepolia, goerli] as const;
 
 const config = createConfig({
-  chains: chains,
-  transports: Object.fromEntries(
-    chains.map(chain => [chain.id, http()])
-  ),
+  chains,
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [goerli.id]: http()
+  },
   connectors: [injected()]
 });
 
