@@ -19,11 +19,17 @@ export function useNFTs() {
         if (!address) throw new Error('No wallet connected');
         if (!chain?.id) throw new Error('No chain selected');
         const fetchedNFTs = await alchemyService.getNFTsForOwner(address, chain.id);
-        // Ensure each NFT has a unique tokenId
-        return fetchedNFTs.map(nft => ({
-          ...nft,
-          tokenId: nft.tokenId.toString() // Ensure tokenId is a string
-        }));
+
+        // Filter out NFTs with invalid tokenIds and map them safely
+        return fetchedNFTs
+          .filter(nft => nft && nft.tokenId) // Ensure NFT and tokenId exist
+          .map(nft => ({
+            ...nft,
+            tokenId: nft.tokenId.toString(), // Convert to string
+            name: nft.name || `NFT #${nft.tokenId}`, // Ensure name exists
+            description: nft.description || 'No description available', // Ensure description exists
+            image: nft.image || 'https://placehold.co/200x200/orange/white?text=NFT' // Ensure image exists
+          }));
       } catch (error) {
         console.error('Error fetching NFTs:', error);
         toast({
