@@ -4,6 +4,7 @@ import { BurnState } from '@/types';
 import nftService from '@/services/web3';
 import { registerBurn } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
+import { type Address } from 'viem';
 
 export function useBurnState() {
   const [state, setState] = useState<BurnState>({
@@ -14,7 +15,7 @@ export function useBurnState() {
   const { toast } = useToast();
 
   const { mutate: burn } = useMutation({
-    mutationFn: async ({ tokenId, tokenAddress }: { tokenId: string; tokenAddress: string }) => {
+    mutationFn: async ({ tokenId, tokenAddress }: { tokenId: string; tokenAddress: Address }) => {
       setState(prev => ({ ...prev, status: 'burning' }));
 
       try {
@@ -22,7 +23,7 @@ export function useBurnState() {
         const txHash = await nftService.burnNFT(tokenAddress, tokenId);
 
         // Register burn with backend
-        await registerBurn({ tokenId, tokenAddress, txHash });
+        await registerBurn({ tokenId, txHash, tokenAddress });
 
         setState(prev => ({
           status: 'completed',

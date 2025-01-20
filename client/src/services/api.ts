@@ -1,8 +1,9 @@
 import { BurnRecord, BurnQueryDto } from '@/types';
+import { type Address } from 'viem';
 
 const API_BASE = '/api/v1';
 
-export async function registerBurn(data: { tokenId: string, txHash: string }): Promise<BurnRecord> {
+export async function registerBurn(data: { tokenId: string, tokenAddress: Address, txHash: string }): Promise<BurnRecord> {
   const response = await fetch(`${API_BASE}/burns/register`, {
     method: 'POST',
     headers: {
