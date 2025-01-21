@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "wagmi";
 import { type Address, hexToNumber } from "viem";
 import { getPublicClient } from "@/services/web3";
+import { useBurns } from "./useBurns";
 
 export function useBurnState() {
   const [state, setState] = useState<BurnState>({
@@ -15,6 +16,11 @@ export function useBurnState() {
     canMint: false,
   });
   const { toast } = useToast();
+  const { address } = useAccount();
+  const { refetch: refetchBurns } = useBurns({ 
+    walletAddress: address as Address,
+    limit: 10 
+  });
 
   const { mutate: burn } = useMutation({
     mutationFn: async ({
@@ -45,6 +51,9 @@ export function useBurnState() {
         }
 
         await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
+
+        // Refetch burns after successful registration
+        await refetchBurns();
 
         setState((prev) => ({
           status: "completed",
