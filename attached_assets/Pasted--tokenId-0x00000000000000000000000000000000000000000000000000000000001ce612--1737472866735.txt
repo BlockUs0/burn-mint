@@ -1,0 +1,62 @@
+[
+    {
+        "tokenId": "0x00000000000000000000000000000000000000000000000000000000001ce612",
+        "chain": "polygon",
+        "walletAddress": "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13",
+        "amount": 1,
+        "timestamp": 1737471084086,
+        "burnProof": {
+            "type": "evm",
+            "txHash": "0xa53e540c5cc6d71f9c33079d00d06f9973131a476a7f14b6f154c5cc6605f911"
+        },
+        "status": "VERIFIED"
+    },
+    {
+        "tokenId": "0x00000000000000000000000000000000000000000000000000000000001ce612",
+        "chain": "polygon",
+        "walletAddress": "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13",
+        "amount": 1,
+        "timestamp": 1737472187131,
+        "burnProof": {
+            "type": "evm",
+            "txHash": "0xb4f50a07232ad1365a1b07c41c45f2a8c4043108ede0141ec75ded7027c4a2c3"
+        },
+        "status": "VERIFIED"
+    },
+    {
+        "tokenId": "0x00000000000000000000000000000000000000000000000000000000001ce612",
+        "chain": "polygon",
+        "walletAddress": "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13",
+        "amount": 1,
+        "timestamp": 1737468836058,
+        "burnProof": {
+            "type": "evm",
+            "txHash": "0x4699562fa317b955d64abf97737f92735ba4c7e88c9e543caa972aaac9aa3528"
+        },
+        "status": "VERIFIED"
+    },
+    {
+        "tokenId": "0x00000000000000000000000000000000000000000000000000000000001ce612",
+        "chain": "polygon",
+        "walletAddress": "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13",
+        "amount": 1,
+        "timestamp": 1737469213041,
+        "burnProof": {
+            "type": "evm",
+            "txHash": "0x6fdda18cbd58ab36287f5fba307e51cbf8f177d82481c17defd820c7c7f92006"
+        },
+        "status": "VERIFIED"
+    },
+    {
+        "tokenId": "0x00000000000000000000000000000000000000000000000000000000001ce612",
+        "chain": "polygon",
+        "walletAddress": "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13",
+        "amount": 1,
+        "timestamp": 1737468710092,
+        "burnProof": {
+            "type": "evm",
+            "txHash": "0xfecaff049be42826a954a0e84b07a555c6d390a01dab32fd425e7957a18944e8"
+        },
+        "status": "VERIFIED"
+    }
+]

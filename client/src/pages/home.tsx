@@ -3,10 +3,17 @@ import { NFTGrid } from "@/components/NFTDisplay/NFTGrid";
 import { BurnProgress } from "@/components/BurnInterface/BurnProgress";
 import { useWallet } from "@/hooks/useWallet";
 import { LockIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
+import { useBurns } from "@/hooks/useBurns";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
   const isAuthenticated = !!localStorage.getItem('auth_token');
+  const { burns } = useBurns({ 
+    walletAddress: address,
+    limit: 10 
+  });
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -35,10 +42,21 @@ export default function Home() {
               </p>
             </div>
           ) : walletStatus === 'connected' && isAuthenticated ? (
-            <>
-              <NFTGrid />
-              <BurnProgress />
-            </>
+            <Tabs defaultValue="nfts" className="space-y-6">
+              <TabsList className="grid w-[400px] grid-cols-2">
+                <TabsTrigger value="nfts">NFTs</TabsTrigger>
+                <TabsTrigger value="history">Burn History</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="nfts" className="space-y-6">
+                <NFTGrid />
+                <BurnProgress />
+              </TabsContent>
+
+              <TabsContent value="history">
+                <BurnHistory burns={burns?.items || []} />
+              </TabsContent>
+            </Tabs>
           ) : (
             <div className="text-center py-20">
               <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
