@@ -51,8 +51,6 @@ export function useBurnState() {
         }
 
         await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
-
-        // Refetch burns after successful registration
         await refetchBurns();
 
         setState((prev) => ({
