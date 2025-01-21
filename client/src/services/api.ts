@@ -55,21 +55,35 @@ export async function registerBurn(data: {
   return response.json();
 }
 
-export async function getBurns(query: BurnQueryDto) {
-  const params = new URLSearchParams({
-    limit: query.limit.toString(),
-    page: (query.page || 1).toString(),
-  });
-
+export async function getBurns(query: BurnQueryDto & { walletAddress?: Address }) {
   const accessToken = localStorage.getItem("blockus_access_token");
   if (!accessToken) {
     throw new Error("No access token found. Please authenticate first.");
   }
 
-  const response = await fetch(`${API_URL}/v1/burns?${params}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const headers = new Headers({
+    'X-ACCESS-TOKEN': '',
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken}`
+  });
+
+  const requestBody = {
+    walletAddress: query.walletAddress,
+    page: query.page || 1,
+    limit: query.limit
+  };
+
+  // For GET requests with body, we append the walletAddress to URL and keep the body
+  const url = new URL(`${API_URL}/v1/burns`);
+  if (query.walletAddress) {
+    url.searchParams.append('walletAddress', query.walletAddress);
+  }
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers,
+    body: JSON.stringify(requestBody),
+    redirect: 'follow'
   });
 
   if (!response.ok) {
