@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
+import { hexToNumber } from "viem"
 
 interface BurnProof {
   type: string
@@ -44,7 +45,16 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
         <TableBody>
           {burns.map((burn) => (
             <TableRow key={burn.burnProof.txHash}>
-              <TableCell className="font-mono">{burn.tokenId}</TableCell>
+              <TableCell>
+                {(() => {
+                  try {
+                    return hexToNumber(burn.tokenId as `0x${string}`).toString()
+                  } catch (error) {
+                    console.error("Error converting tokenId", error)
+                    return burn.tokenId
+                  }
+                })()}
+              </TableCell>
               <TableCell className="capitalize">{burn.chain}</TableCell>
               <TableCell>{burn.amount}</TableCell>
               <TableCell>
