@@ -33,5 +33,6 @@ export function useBurns(options: UseBurnsOptions = {}) {
     error: burnsQuery.error,
     registerBurn: burnMutation.mutate,
     isRegistering: burnMutation.isPending,
+    refetch: burnsQuery.refetch, // Expose the refetch function
   };
 }
