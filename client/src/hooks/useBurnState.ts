@@ -27,14 +27,25 @@ export function useBurnState() {
 
       try {
         const txHash = await nftService.burnNFT(tokenAddress, tokenId);
-
-        // Register burn with backend
-        const { address: walletAddress } = useAccount();
-        if (!walletAddress) {
-            throw new Error("Wallet address is missing");
-        }
         
-        await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
+        // Wait for transaction confirmation
+        const publicClient = await getPublicClient();
+        const receipt = await publicClient.waitForTransactionReceipt({ 
+          hash: txHash,
+          timeout: 60_000 // 60 seconds timeout
+        });
+
+        if (receipt.status === 'success') {
+          // Register burn with backend only after successful transaction
+          const { address: walletAddress } = useAccount();
+          if (!walletAddress) {
+              throw new Error("Wallet address is missing");
+          }
+          
+          await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
+        } else {
+          throw new Error("Transaction failed");
+        }
 
         setState((prev) => ({
           status: "completed",
