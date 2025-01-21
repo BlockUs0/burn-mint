@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useBurnState } from "@/hooks/useBurnState";
 import { useWallet } from "@/hooks/useWallet";
+import { useBurns } from "@/hooks/useBurns";
 import { Flame, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { type Address } from "viem";
+import { useEffect } from "react";
 
 interface BurnButtonProps {
   tokenId: string;
@@ -18,6 +20,18 @@ export function BurnButton({
 }: BurnButtonProps) {
   const { burn, status } = useBurnState();
   const { address } = useWallet();
+  const { burns, isLoading } = useBurns({
+    walletAddress: address as Address,
+    limit: 10,
+    page: 1,
+  });
+
+  // Log burns when wallet is connected and data is loaded
+  useEffect(() => {
+    if (address && burns && !isLoading) {
+      console.log("Current burn history for wallet:", burns);
+    }
+  }, [address, burns, isLoading]);
 
   const handleBurn = () => {
     if (!address) {

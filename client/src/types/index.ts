@@ -43,6 +43,7 @@ export interface BurnRecord {
 export interface BurnQueryDto {
   limit: number;
   page?: number;
+  walletAddress?: string; // Added to support wallet filtering
 }
 
 export interface BurnPaginatedResponse {

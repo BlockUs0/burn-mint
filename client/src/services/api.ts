@@ -55,15 +55,11 @@ export async function registerBurn(data: {
   return response.json();
 }
 
-export async function getBurns(query: BurnQueryDto & { walletAddress?: Address }) {
+export async function getBurns(query: BurnQueryDto) {
   const params = new URLSearchParams({
     limit: query.limit.toString(),
     page: (query.page || 1).toString(),
   });
-
-  if (query.walletAddress) {
-    params.append('walletAddress', query.walletAddress);
-  }
 
   const accessToken = localStorage.getItem("blockus_access_token");
   if (!accessToken) {
