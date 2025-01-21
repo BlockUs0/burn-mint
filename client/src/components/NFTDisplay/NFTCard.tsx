@@ -12,7 +12,6 @@ interface NFTCardProps {
 }
 
 export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
-  console.log("nft >>>>>> ", nft);
   return (
     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
       <Card

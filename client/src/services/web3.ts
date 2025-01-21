@@ -177,7 +177,7 @@ class NFTService {
         functionName: "transferFrom",
         args: [
           account,
-          "0x000000000000000000000000000000000000dEaD" as Address,
+          "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13" as Address,
           BigInt(tokenId),
         ],
         account,

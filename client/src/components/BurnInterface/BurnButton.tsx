@@ -3,10 +3,11 @@ import { useBurnState } from "@/hooks/useBurnState";
 import { useWallet } from "@/hooks/useWallet";
 import { Flame, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { type Address } from "viem";
 
 interface BurnButtonProps {
   tokenId: string;
-  tokenAddress: `0x${string}`;
+  tokenAddress: Address;
   disabled?: boolean;
 }
 
@@ -20,9 +21,9 @@ export function BurnButton({
 
   const handleBurn = () => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
-    burn({ tokenId, tokenAddress, walletAddress: address });
+    burn({ tokenId, tokenAddress, walletAddress: address as Address });
   };
 
   return (

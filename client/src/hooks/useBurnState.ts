@@ -5,7 +5,8 @@ import nftService from "@/services/web3";
 import { registerBurn } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "wagmi";
-import { type Address } from "viem";
+import { type Address, hexToNumber } from "viem";
+import { getPublicClient } from "@/services/web3";
 
 export function useBurnState() {
   const [state, setState] = useState<BurnState>({
@@ -19,33 +20,31 @@ export function useBurnState() {
     mutationFn: async ({
       tokenId,
       tokenAddress,
+      walletAddress,
     }: {
       tokenId: string;
       tokenAddress: Address;
+      walletAddress: Address;
     }) => {
       setState((prev) => ({ ...prev, status: "burning" }));
 
       try {
-        const txHash = await nftService.burnNFT(tokenAddress, tokenId);
-        
-        // Wait for transaction confirmation
+        const txHash = await nftService.burnNFT(
+          tokenAddress,
+          hexToNumber(tokenId).toString(),
+        );
+
         const publicClient = await getPublicClient();
-        const receipt = await publicClient.waitForTransactionReceipt({ 
+        const receipt = await publicClient.waitForTransactionReceipt({
           hash: txHash,
-          timeout: 60_000 // 60 seconds timeout
+          timeout: 60_000,
         });
 
-        if (receipt.status === 'success') {
-          // Register burn with backend only after successful transaction
-          const { address: walletAddress } = useAccount();
-          if (!walletAddress) {
-              throw new Error("Wallet address is missing");
-          }
-          
-          await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
-        } else {
-          throw new Error("Transaction failed");
+        if (receipt.status !== "success") {
+          throw new Error("Could not burn NFT");
         }
+
+        await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
 
         setState((prev) => ({
           status: "completed",
