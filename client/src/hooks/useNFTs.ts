@@ -11,6 +11,7 @@ export function useNFTs() {
   const { chain } = useNetwork();
   const [selectedNFT, setSelectedNFT] = useState<string | null>(null);
   const { toast } = useToast();
+  const isAuthenticated = !!localStorage.getItem('auth_token');
 
   const { data: nfts = [], isLoading: loading, error } = useQuery({
     queryKey: ['nfts', address, chain?.id],
@@ -18,17 +19,18 @@ export function useNFTs() {
       try {
         if (!address) throw new Error('No wallet connected');
         if (!chain?.id) throw new Error('No chain selected');
+        if (!isAuthenticated) throw new Error('Not authenticated');
+
         const fetchedNFTs = await alchemyService.getNFTsForOwner(address, chain.id);
 
-        // Filter out NFTs with invalid tokenIds and map them safely
         return fetchedNFTs
-          .filter(nft => nft && nft.tokenId) // Ensure NFT and tokenId exist
+          .filter(nft => nft && nft.tokenId)
           .map(nft => ({
             ...nft,
-            tokenId: nft.tokenId.toString(), // Convert to string
-            name: nft.name || `NFT #${nft.tokenId}`, // Ensure name exists
-            description: nft.description || 'No description available', // Ensure description exists
-            image: nft.image || 'https://placehold.co/200x200/orange/white?text=NFT' // Ensure image exists
+            tokenId: nft.tokenId.toString(),
+            name: nft.name || `NFT #${nft.tokenId}`,
+            description: nft.description || 'No description available',
+            image: nft.image || 'https://placehold.co/200x200/orange/white?text=NFT'
           }));
       } catch (error) {
         console.error('Error fetching NFTs:', error);
@@ -40,17 +42,17 @@ export function useNFTs() {
         return [];
       }
     },
-    enabled: status === 'connected' && !!address && !!chain?.id,
+    enabled: status === 'connected' && !!address && !!chain?.id && isAuthenticated,
     retry: 1,
     staleTime: 30000,
   });
 
-  // Reset selection when wallet disconnects
+  // Reset selection when wallet disconnects or auth status changes
   useEffect(() => {
-    if (status !== 'connected') {
+    if (status !== 'connected' || !isAuthenticated) {
       setSelectedNFT(null);
     }
-  }, [status]);
+  }, [status, isAuthenticated]);
 
   const selectNFT = (tokenId: string) => {
     setSelectedNFT(prev => prev === tokenId ? null : tokenId);
