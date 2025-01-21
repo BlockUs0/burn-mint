@@ -67,22 +67,17 @@ export async function getBurns(query: BurnQueryDto & { walletAddress?: Address }
     'Authorization': `Bearer ${accessToken}`
   });
 
-  const requestBody = {
-    walletAddress: query.walletAddress,
-    page: query.page || 1,
-    limit: query.limit
-  };
-
-  // For GET requests with body, we append the walletAddress to URL and keep the body
+  // Construct URL with query parameters
   const url = new URL(`${API_URL}/v1/burns`);
   if (query.walletAddress) {
     url.searchParams.append('walletAddress', query.walletAddress);
   }
+  url.searchParams.append('page', (query.page || 1).toString());
+  url.searchParams.append('limit', query.limit.toString());
 
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers,
-    body: JSON.stringify(requestBody),
     redirect: 'follow'
   });
 
