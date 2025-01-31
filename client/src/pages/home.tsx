@@ -11,18 +11,18 @@ import { useBurns } from "@/hooks/useBurns";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
-  const { selectedCollection, isApprovedForAll, showNFTGrid } = useNFTs();
+  const { showNFTGrid } = useNFTs();
   const isAuthenticated = !!localStorage.getItem('auth_token');
   const { burns } = useBurns({ 
-    walletAddress: address,
+    walletAddress: address as `0x${string}`,
     limit: 10 
   });
 
-  const renderNFTContent = () => {
+  const renderMainContent = () => {
+    // Show collection grid by default, switch to NFT grid when showNFTGrid is true
     if (!showNFTGrid) {
       return <CollectionGrid />;
     }
-
     return (
       <>
         <NFTGrid />
@@ -65,7 +65,7 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6">
-                {renderNFTContent()}
+                {renderMainContent()}
               </TabsContent>
 
               <TabsContent value="history">
