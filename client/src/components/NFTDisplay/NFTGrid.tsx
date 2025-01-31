@@ -11,12 +11,8 @@ export function NFTGrid() {
     selectedCollection,
     selectCollection,
     selectedNFTs,
-    toggleNFTSelection,
-    showNFTGrid
+    toggleNFTSelection
   } = useNFTs();
-
-  // If not showing NFT grid, don't render anything
-  if (!showNFTGrid) return null;
 
   const selectedCollectionData = selectedCollection 
     ? collections.find(c => c.address === selectedCollection)

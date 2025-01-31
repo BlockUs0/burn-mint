@@ -18,19 +18,6 @@ export default function Home() {
     limit: 10 
   });
 
-  const renderMainContent = () => {
-    // Show collection grid by default, switch to NFT grid when showNFTGrid is true
-    if (!showNFTGrid) {
-      return <CollectionGrid />;
-    }
-    return (
-      <>
-        <NFTGrid />
-        <BurnProgress />
-      </>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
@@ -65,7 +52,14 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6">
-                {renderMainContent()}
+                {showNFTGrid ? (
+                  <>
+                    <NFTGrid />
+                    <BurnProgress />
+                  </>
+                ) : (
+                  <CollectionGrid />
+                )}
               </TabsContent>
 
               <TabsContent value="history">
