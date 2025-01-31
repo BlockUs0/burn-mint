@@ -8,21 +8,22 @@ export function NFTLayout() {
   const { showNFTGrid, selectedCollection } = useNFTs();
 
   useEffect(() => {
-    console.log("NFTLayout re-rendering with:", {
+    console.log("NFTLayout state changed:", {
       showNFTGrid,
       selectedCollection
     });
   }, [showNFTGrid, selectedCollection]);
 
-  // Force re-render when showNFTGrid changes
-  const content = showNFTGrid ? (
-    <div className="space-y-6" key="nft-grid">
-      <NFTGrid />
-      <BurnProgress />
+  return (
+    <div className="w-full">
+      {showNFTGrid ? (
+        <div className="space-y-6">
+          <NFTGrid />
+          <BurnProgress />
+        </div>
+      ) : (
+        <CollectionGrid />
+      )}
     </div>
-  ) : (
-    <CollectionGrid key="collection-grid" />
   );
-
-  return content;
 }
