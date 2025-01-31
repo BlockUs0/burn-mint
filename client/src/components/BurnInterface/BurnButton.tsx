@@ -34,32 +34,28 @@ export function BurnButton({
     }
   }, [address, burns, isLoading]);
 
-  const handleBurn = () => {
+  const handleBurn = async () => {
     if (!address) {
       throw new Error("Wallet not connected");
     }
 
-    if (isBatch && Array.isArray(tokenIds)) {
-      // Handle batch burn
-      burn({
-        tokenIds,
+    const tokenIdsArray = Array.isArray(tokenIds) ? tokenIds : [tokenIds];
+
+    try {
+      await burn({
+        tokenId: tokenIdsArray[0], // Use first token for single burns
+        tokenIds: tokenIdsArray, // Pass all tokens for batch support
         tokenAddress,
-        walletAddress: address as Address,
-        isBatch: true,
+        walletAddress: address,
       });
-    } else if (!Array.isArray(tokenIds)) {
-      // Handle single burn
-      burn({
-        tokenIds: [tokenIds],
-        tokenAddress,
-        walletAddress: address as Address,
-        isBatch: false,
-      });
+    } catch (error) {
+      console.error("Error during burn:", error);
+      throw error;
     }
   };
 
   const buttonText = isBatch
-    ? `Burn ${Array.isArray(tokenIds) ? tokenIds.length : 0} NFTs`
+    ? `Burn ${Array.isArray(tokenIds) ? tokenIds.length : 1} NFTs`
     : "Burn NFT";
 
   return (
