@@ -18,6 +18,18 @@ export default function Home() {
     limit: 10 
   });
 
+  const renderNFTContent = () => {
+    if (showNFTGrid) {
+      return (
+        <>
+          <NFTGrid />
+          <BurnProgress />
+        </>
+      );
+    }
+    return <CollectionGrid />;
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
@@ -52,14 +64,7 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6">
-                {showNFTGrid ? (
-                  <>
-                    <NFTGrid />
-                    <BurnProgress />
-                  </>
-                ) : (
-                  <CollectionGrid />
-                )}
+                {renderNFTContent()}
               </TabsContent>
 
               <TabsContent value="history">

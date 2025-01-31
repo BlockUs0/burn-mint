@@ -15,7 +15,8 @@ export function CollectionGrid() {
     selectedCollection, 
     selectCollection,
     isApprovedForAll,
-    viewCollection 
+    viewCollection,
+    showNFTGrid
   } = useNFTs();
   const { toast } = useToast();
 
