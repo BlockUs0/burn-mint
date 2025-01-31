@@ -5,7 +5,7 @@ import nftService from "@/services/web3";
 import { registerBurn } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "wagmi";
-import { type Address, hexToNumber } from "viem";
+import { type Address } from "viem";
 import { getPublicClient } from "@/services/web3";
 import { useBurns } from "./useBurns";
 
@@ -24,21 +24,19 @@ export function useBurnState() {
 
   const { mutate: burn } = useMutation({
     mutationFn: async ({
-      tokenId,
+      tokenIds,
       tokenAddress,
       walletAddress,
     }: {
-      tokenId: string;
+      tokenIds: string[];
       tokenAddress: Address;
       walletAddress: Address;
     }) => {
       setState((prev) => ({ ...prev, status: "burning" }));
 
       try {
-        const txHash = await nftService.burnNFT(
-          tokenAddress,
-          hexToNumber(tokenId).toString(),
-        );
+        // Use batch burn functionality from web3 service
+        const txHash = await nftService.batchBurnNFTs(tokenAddress, tokenIds);
 
         const publicClient = await getPublicClient();
         const receipt = await publicClient.waitForTransactionReceipt({
@@ -47,21 +45,29 @@ export function useBurnState() {
         });
 
         if (receipt.status !== "success") {
-          throw new Error("Could not burn NFT");
+          throw new Error("Transaction failed");
         }
 
-        await registerBurn({ tokenId, txHash, tokenAddress, walletAddress });
+        // Register the burn with our backend
+        await registerBurn({ 
+          tokenIds,
+          txHash, 
+          tokenAddress, 
+          walletAddress 
+        });
+
+        // Refresh burn history
         await refetchBurns();
 
         setState((prev) => ({
           status: "completed",
-          burnCount: prev.burnCount + 1,
-          canMint: prev.burnCount + 1 >= 2,
+          burnCount: prev.burnCount + tokenIds.length,
+          canMint: prev.burnCount + tokenIds.length >= 2,
         }));
 
         toast({
-          title: "NFT Burned Successfully",
-          description: "Your NFT has been transformed into pure energy",
+          title: tokenIds.length > 1 ? "NFTs Burned Successfully" : "NFT Burned Successfully",
+          description: `${tokenIds.length} NFT${tokenIds.length > 1 ? 's' : ''} transformed into pure energy`,
         });
       } catch (error) {
         setState((prev) => ({ ...prev, status: "error" }));

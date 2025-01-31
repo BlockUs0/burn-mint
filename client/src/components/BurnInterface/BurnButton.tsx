@@ -22,7 +22,7 @@ export function BurnButton({
 }: BurnButtonProps) {
   const { burn, status } = useBurnState();
   const { address } = useWallet();
-  const { burns, isLoading } = useBurns({
+  const { burns, isLoading } = useBurns({ 
     walletAddress: address as Address,
     limit: 10,
     page: 1,
@@ -43,10 +43,9 @@ export function BurnButton({
 
     try {
       await burn({
-        tokenId: tokenIdsArray[0], // Use first token for single burns
-        tokenIds: tokenIdsArray, // Pass all tokens for batch support
+        tokenIds: tokenIdsArray,
         tokenAddress,
-        walletAddress: address,
+        walletAddress: address as Address,
       });
     } catch (error) {
       console.error("Error during burn:", error);
