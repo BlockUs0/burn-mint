@@ -3,6 +3,7 @@ import { NFTCard } from "./NFTCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Loader2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BurnButton } from "../BurnInterface/BurnButton";
 
 export function NFTGrid() {
   const { 
@@ -13,9 +14,6 @@ export function NFTGrid() {
     selectedNFTs,
     toggleNFTSelection,
   } = useNFTs();
-
-  console.log("NFTGrid rendering with selectedCollection:", selectedCollection);
-  console.log("Selected collection data:", collections.find(c => c.address === selectedCollection));
 
   const selectedCollectionData = selectedCollection 
     ? collections.find(c => c.address === selectedCollection)
@@ -66,33 +64,50 @@ export function NFTGrid() {
     );
   }
 
+  const selectedNFTsArray = selectedCollectionData.nfts.filter(nft => 
+    selectedNFTs.has(nft.tokenId)
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          {selectedCollectionData.name} ({selectedCollectionData.nfts.length} NFTs)
-        </h2>
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-        >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Back to Collections
-        </Button>
+        <div>
+          <h2 className="text-xl font-semibold">
+            {selectedCollectionData.name} ({selectedCollectionData.nfts.length} NFTs)
+          </h2>
+          {selectedNFTsArray.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {selectedNFTsArray.length} NFT{selectedNFTsArray.length !== 1 ? 's' : ''} selected
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {selectedNFTsArray.length > 0 && (
+            <BurnButton
+              tokenIds={selectedNFTsArray.map(nft => nft.tokenId)}
+              tokenAddress={selectedCollection as `0x${string}`}
+              isBatch={true}
+            />
+          )}
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+          >
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            Back to Collections
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {selectedCollectionData.nfts.map((nft) => {
-          console.log("Rendering NFT:", nft);
-          return (
-            <NFTCard
-              key={`nft-${nft.tokenId}`}
-              nft={nft}
-              selected={selectedNFTs.has(nft.tokenId)}
-              onSelect={() => toggleNFTSelection(nft.tokenId)}
-            />
-          );
-        })}
+        {selectedCollectionData.nfts.map((nft) => (
+          <NFTCard
+            key={`nft-${nft.tokenId}`}
+            nft={nft}
+            selected={selectedNFTs.has(nft.tokenId)}
+            onSelect={() => toggleNFTSelection(nft.tokenId)}
+          />
+        ))}
       </div>
     </div>
   );

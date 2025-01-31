@@ -10,7 +10,7 @@ interface BurnProof {
 }
 
 interface BurnRegistrationData {
-  tokenId: string;
+  tokenIds: string[];
   chain: string;
   walletAddress: string;
   burnProof: BurnProof;
@@ -18,20 +18,20 @@ interface BurnRegistrationData {
 }
 
 export async function registerBurn(data: {
-  tokenId: string;
+  tokenIds: string[];
   tokenAddress: Address;
   txHash: string;
   walletAddress: Address;
 }): Promise<BurnRecord> {
   const burnData: BurnRegistrationData = {
-    tokenId: data.tokenId,
+    tokenIds: data.tokenIds,
     chain: "polygon", // Currently hardcoded to polygon
     walletAddress: data.walletAddress,
     burnProof: {
       type: "evm",
       txHash: data.txHash,
     },
-    amount: 1, // Default to 1 for ERC721
+    amount: data.tokenIds.length, // Amount is now the number of tokens being burned
   };
 
   const accessToken = localStorage.getItem("blockus_access_token");

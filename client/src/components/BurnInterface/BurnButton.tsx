@@ -8,15 +8,17 @@ import { type Address } from "viem";
 import { useEffect } from "react";
 
 interface BurnButtonProps {
-  tokenId: string;
+  tokenIds: string | string[];
   tokenAddress: Address;
   disabled?: boolean;
+  isBatch?: boolean;
 }
 
 export function BurnButton({
-  tokenId,
+  tokenIds,
   tokenAddress,
   disabled,
+  isBatch = false,
 }: BurnButtonProps) {
   const { burn, status } = useBurnState();
   const { address } = useWallet();
@@ -26,7 +28,6 @@ export function BurnButton({
     page: 1,
   });
 
-  // Log burns when wallet is connected and data is loaded
   useEffect(() => {
     if (address && burns && !isLoading) {
       console.log("Current burn history for wallet:", burns);
@@ -37,24 +38,45 @@ export function BurnButton({
     if (!address) {
       throw new Error("Wallet not connected");
     }
-    burn({ tokenId, tokenAddress, walletAddress: address as Address });
+
+    if (isBatch && Array.isArray(tokenIds)) {
+      // Handle batch burn
+      burn({
+        tokenIds,
+        tokenAddress,
+        walletAddress: address as Address,
+        isBatch: true,
+      });
+    } else if (!Array.isArray(tokenIds)) {
+      // Handle single burn
+      burn({
+        tokenIds: [tokenIds],
+        tokenAddress,
+        walletAddress: address as Address,
+        isBatch: false,
+      });
+    }
   };
+
+  const buttonText = isBatch
+    ? `Burn ${Array.isArray(tokenIds) ? tokenIds.length : 0} NFTs`
+    : "Burn NFT";
 
   return (
     <Button
       onClick={handleBurn}
       disabled={disabled || status === "burning" || !address}
-      className="w-full bg-red-600 hover:bg-red-700"
+      className="bg-red-600 hover:bg-red-700"
     >
       {status === "burning" ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Burning...
+          {isBatch ? "Burning NFTs..." : "Burning..."}
         </>
       ) : (
         <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
           <Flame className="mr-2 h-4 w-4" />
-          Burn NFT
+          {buttonText}
         </motion.div>
       )}
     </Button>
