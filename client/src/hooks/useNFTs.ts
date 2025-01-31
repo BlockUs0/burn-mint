@@ -41,6 +41,16 @@ export function useNFTs() {
     staleTime: 30000,
   });
 
+  // Reset selections when wallet disconnects or auth status changes
+  useEffect(() => {
+    if (status !== 'connected' || !isAuthenticated) {
+      setSelectedCollection(null);
+      setSelectedNFTs(new Set());
+      setIsApprovedForAll(false);
+      setShowNFTGrid(false);
+    }
+  }, [status, isAuthenticated]);
+
   // Check approval status whenever collection changes
   useEffect(() => {
     async function checkApproval() {
@@ -58,24 +68,13 @@ export function useNFTs() {
     checkApproval();
   }, [selectedCollection, address, chain?.id]);
 
-  // Reset selections when wallet disconnects or auth status changes
-  useEffect(() => {
-    if (status !== 'connected' || !isAuthenticated) {
-      setSelectedCollection(null);
-      setSelectedNFTs(new Set());
-      setIsApprovedForAll(false);
-      setShowNFTGrid(false);
-    }
-  }, [status, isAuthenticated]);
-
   const selectCollection = (address: string) => {
+    setShowNFTGrid(false); // Reset grid visibility when selecting new collection
     if (address === '') {
-      setShowNFTGrid(false);
       setSelectedCollection(null);
     } else {
       setSelectedCollection(address);
-      // Reset NFT selection when changing collection
-      setSelectedNFTs(new Set());
+      setSelectedNFTs(new Set()); // Reset NFT selection when changing collection
     }
     console.log('Collection selected:', address);
   };
