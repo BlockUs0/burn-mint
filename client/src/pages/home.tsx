@@ -8,19 +8,27 @@ import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
 import { useBurns } from "@/hooks/useBurns";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
   const { showNFTGrid } = useNFTs();
+  const [currentView, setCurrentView] = useState<"collection" | "nft">("collection");
   const isAuthenticated = !!localStorage.getItem("auth_token");
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
     limit: 10,
   });
 
+  // Monitor showNFTGrid changes
+  useEffect(() => {
+    console.log("showNFTGrid changed in Home:", showNFTGrid);
+    setCurrentView(showNFTGrid ? "nft" : "collection");
+  }, [showNFTGrid]);
+
   const renderNFTContent = () => {
-    console.log(showNFTGrid);
-    if (showNFTGrid) {
+    console.log("Rendering content. Current view:", currentView, "showNFTGrid:", showNFTGrid);
+    if (currentView === "nft") {
       return (
         <>
           <NFTGrid />
