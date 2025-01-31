@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from './useWallet';
 import { useQuery } from '@tanstack/react-query';
 import { NFT, NFTCollection } from '@/types';
@@ -71,28 +71,27 @@ export function useNFTs() {
     checkApproval();
   }, [selectedCollection, address, chain?.id]);
 
-  const selectCollection = (address: string) => {
+  const selectCollection = useCallback((address: string) => {
     if (address === '') {
       setSelectedCollection(null);
-      setShowNFTGrid(false); // Reset grid visibility when clearing selection
+      setShowNFTGrid(false);
     } else {
       setSelectedCollection(address);
-      setSelectedNFTs(new Set()); // Reset NFT selection when changing collection
-      setShowNFTGrid(false); // Reset grid visibility when selecting new collection
+      setSelectedNFTs(new Set());
+      setShowNFTGrid(false);
     }
     console.log('Collection selected:', address);
-  };
+  }, []);
 
-  const viewCollection = () => {
+  const viewCollection = useCallback(() => {
     console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
     if (isApprovedForAll && selectedCollection) {
-      // Force state update by using a callback
       setShowNFTGrid(true);
       console.log('Showing NFT grid');
     }
-  };
+  }, [isApprovedForAll, selectedCollection]);
 
-  const toggleNFTSelection = (tokenId: string) => {
+  const toggleNFTSelection = useCallback((tokenId: string) => {
     setSelectedNFTs(prev => {
       const newSelection = new Set(prev);
       if (newSelection.has(tokenId)) {
@@ -102,12 +101,17 @@ export function useNFTs() {
       }
       return newSelection;
     });
-  };
+  }, []);
 
   // Debug effect to monitor state changes
   useEffect(() => {
-    console.log('State updated:', { showNFTGrid, selectedCollection, isApprovedForAll });
-  }, [showNFTGrid, selectedCollection, isApprovedForAll]);
+    console.log('State updated:', { 
+      showNFTGrid, 
+      selectedCollection, 
+      isApprovedForAll,
+      selectedNFTsCount: selectedNFTs.size 
+    });
+  }, [showNFTGrid, selectedCollection, isApprovedForAll, selectedNFTs]);
 
   return {
     collections,

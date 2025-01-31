@@ -8,7 +8,7 @@ import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
 import { useBurns } from "@/hooks/useBurns";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
@@ -26,7 +26,7 @@ export default function Home() {
     setCurrentView(showNFTGrid ? "nft" : "collection");
   }, [showNFTGrid]);
 
-  const renderNFTContent = () => {
+  const renderNFTContent = useCallback(() => {
     console.log("Rendering content. Current view:", currentView, "showNFTGrid:", showNFTGrid);
     if (currentView === "nft") {
       return (
@@ -37,7 +37,7 @@ export default function Home() {
       );
     }
     return <CollectionGrid />;
-  };
+  }, [currentView, showNFTGrid]); // Add dependencies that should trigger re-render
 
   return (
     <div className="min-h-screen bg-background text-foreground">
