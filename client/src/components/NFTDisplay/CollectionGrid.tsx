@@ -9,18 +9,20 @@ import nftService from "@/services/web3";
 import { useToast } from "@/hooks/use-toast";
 
 export function CollectionGrid() {
-  const { 
-    collections, 
-    loading, 
-    selectedCollection, 
+  const {
+    collections,
+    loading,
+    selectedCollection,
     selectCollection,
     isApprovedForAll,
     viewCollection,
-    showNFTGrid
   } = useNFTs();
   const { toast } = useToast();
-
-  const handleApproval = async (collectionAddress: string, e: React.MouseEvent) => {
+  
+  const handleApproval = async (
+    collectionAddress: string,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation(); // Prevent card click
     try {
       await nftService.setApprovalForAll(collectionAddress as `0x${string}`);
@@ -29,11 +31,11 @@ export function CollectionGrid() {
         description: "You can now batch burn NFTs from this collection",
       });
     } catch (error) {
-      console.error('Error setting approval:', error);
+      console.error("Error setting approval:", error);
       toast({
         variant: "destructive",
         title: "Approval Failed",
-        description: (error as Error).message
+        description: (error as Error).message,
       });
     }
   };
@@ -41,12 +43,12 @@ export function CollectionGrid() {
   const handleViewNFTs = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent any default behavior
     e.stopPropagation(); // Prevent card click
-    console.log('View NFTs clicked');
+    console.log("View NFTs clicked");
     viewCollection();
   };
 
   const handleCollectionSelect = (address: string) => {
-    console.log('Collection card clicked:', address);
+    console.log("Collection card clicked:", address);
     selectCollection(address);
   };
 
@@ -61,10 +63,7 @@ export function CollectionGrid() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton
-              key={`skeleton-${i}`}
-              className="h-32 rounded-lg"
-            />
+            <Skeleton key={`skeleton-${i}`} className="h-32 rounded-lg" />
           ))}
         </div>
       </div>
@@ -77,8 +76,8 @@ export function CollectionGrid() {
         <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
         <h3 className="text-lg font-semibold mb-2">No NFT Collections Found</h3>
         <p className="text-muted-foreground max-w-md">
-          We couldn't find any NFT collections in your wallet. Make sure you're connected
-          to the right network and have some NFTs.
+          We couldn't find any NFT collections in your wallet. Make sure you're
+          connected to the right network and have some NFTs.
         </p>
       </div>
     );
@@ -87,7 +86,7 @@ export function CollectionGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {collections.map((collection) => (
-        <motion.div 
+        <motion.div
           key={collection.address}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

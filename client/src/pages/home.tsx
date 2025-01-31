@@ -12,13 +12,14 @@ import { useBurns } from "@/hooks/useBurns";
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
   const { showNFTGrid } = useNFTs();
-  const isAuthenticated = !!localStorage.getItem('auth_token');
-  const { burns } = useBurns({ 
+  const isAuthenticated = !!localStorage.getItem("auth_token");
+  const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
-    limit: 10 
+    limit: 10,
   });
 
   const renderNFTContent = () => {
+    console.log(showNFTGrid);
     if (showNFTGrid) {
       return (
         <>
@@ -41,22 +42,26 @@ export default function Home() {
         </header>
 
         <main>
-          {!walletStatus || walletStatus === 'disconnected' ? (
+          {!walletStatus || walletStatus === "disconnected" ? (
             <div className="text-center py-20">
-              <h2 className="text-2xl font-semibold mb-4">Connect Your Wallet to Start</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                Connect Your Wallet to Start
+              </h2>
               <p className="text-muted-foreground">
                 Connect your wallet to access your NFTs
               </p>
             </div>
-          ) : walletStatus === 'connected' && !isAuthenticated ? (
+          ) : walletStatus === "connected" && !isAuthenticated ? (
             <div className="text-center py-20">
               <LockIcon className="w-12 h-12 mx-auto mb-4 text-orange-500" />
-              <h2 className="text-2xl font-semibold mb-4">Authentication Required</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                Authentication Required
+              </h2>
               <p className="text-muted-foreground">
                 Please sign with your Ethereum wallet to access your NFTs
               </p>
             </div>
-          ) : walletStatus === 'connected' && isAuthenticated ? (
+          ) : walletStatus === "connected" && isAuthenticated ? (
             <Tabs defaultValue="nfts" className="space-y-6">
               <TabsList className="grid w-[400px] grid-cols-2">
                 <TabsTrigger value="nfts">NFTs</TabsTrigger>

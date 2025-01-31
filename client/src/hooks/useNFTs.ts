@@ -72,12 +72,13 @@ export function useNFTs() {
   }, [selectedCollection, address, chain?.id]);
 
   const selectCollection = (address: string) => {
-    setShowNFTGrid(false); // Reset grid visibility when selecting new collection
     if (address === '') {
       setSelectedCollection(null);
+      setShowNFTGrid(false); // Reset grid visibility when clearing selection
     } else {
       setSelectedCollection(address);
       setSelectedNFTs(new Set()); // Reset NFT selection when changing collection
+      setShowNFTGrid(false); // Reset grid visibility when selecting new collection
     }
     console.log('Collection selected:', address);
   };
@@ -85,6 +86,7 @@ export function useNFTs() {
   const viewCollection = () => {
     console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
     if (isApprovedForAll && selectedCollection) {
+      // Force state update by using a callback
       setShowNFTGrid(true);
       console.log('Showing NFT grid');
     }
@@ -102,6 +104,11 @@ export function useNFTs() {
     });
   };
 
+  // Debug effect to monitor state changes
+  useEffect(() => {
+    console.log('State updated:', { showNFTGrid, selectedCollection, isApprovedForAll });
+  }, [showNFTGrid, selectedCollection, isApprovedForAll]);
+
   return {
     collections,
     loading,
@@ -113,6 +120,6 @@ export function useNFTs() {
     isApprovedForAll,
     showNFTGrid,
     viewCollection,
-    setShowNFTGrid // Export this to allow going back to collection view
+    setShowNFTGrid
   };
 }
