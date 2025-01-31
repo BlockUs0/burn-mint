@@ -1,4 +1,5 @@
 import {
+  createConfig,
   createPublicClient,
   createWalletClient,
   custom,
@@ -133,9 +134,9 @@ export const BATCH_TRANSFER_ABI = [
     type: "function",
     stateMutability: "nonpayable",
     inputs: [
-      { name: "erc721Contract", type: "address" },
-      { name: "to", type: "address" },
-      { name: "tokenIds", type: "uint256[]" },
+      { internalType: "address", name: "erc721Contract", type: "address" },
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "uint256[]", name: "tokenIds", type: "uint256[]" },
     ],
     outputs: [],
   },
