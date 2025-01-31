@@ -85,8 +85,16 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     });
 
     const data = await response.json();
+    console.log("Raw Alchemy API Response:", JSON.stringify(data, null, 2));
 
     const nfts = data.ownedNfts.map((nft: any) => {
+      console.log("Processing NFT from Alchemy:", {
+        tokenId: nft.id.tokenId,
+        name: nft.name || nft.title,
+        contractAddress: nft.contract.address,
+        tokenType: nft.contractMetadata.tokenType
+      });
+
       let imageUrl = "";
       if (nft.image?.cachedUrl) {
         imageUrl = nft.image.cachedUrl;
@@ -114,6 +122,9 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
 
     allNFTs = [...allNFTs, ...nfts];
     pageKey = data.pageKey;
+
+    console.log("Current page NFTs count:", nfts.length);
+    console.log("Total NFTs collected so far:", allNFTs.length);
   } while (pageKey);
 
   return allNFTs;
@@ -129,7 +140,9 @@ export async function getNFTsForOwner(
     }
 
     const baseUrl = getAlchemyBaseUrl(chainId);
-    return getAllNFTPages(baseUrl, ownerAddress);
+    const nfts = await getAllNFTPages(baseUrl, ownerAddress);
+    console.log("Total NFTs fetched for owner:", nfts.length);
+    return nfts;
   } catch (error) {
     console.error("Error fetching NFTs from Alchemy:", error);
     throw error;
@@ -143,32 +156,43 @@ export async function getNFTCollections(
   try {
     const nfts = await getNFTsForOwner(ownerAddress, chainId);
     console.log("Total NFTs fetched:", nfts.length);
+    console.log("All NFTs before grouping:", nfts.map(nft => ({
+      tokenId: nft.tokenId,
+      name: nft.name,
+      tokenAddress: nft.tokenAddress
+    })));
 
     const collections = nfts.reduce((acc, nft) => {
+      console.log("Processing NFT for collection:", {
+        tokenId: nft.tokenId,
+        tokenAddress: nft.tokenAddress,
+        name: nft.name
+      });
+
       const collection = acc.get(nft.tokenAddress) || {
         address: nft.tokenAddress,
         name: nft.name.split('#')[0].trim(),
-        nfts: new Set(), // Use Set for unique NFTs
+        nfts: [],
         totalNFTs: 0,
         chainId
       };
 
-      // Only add NFT if it's not already in the collection
-      if (!Array.from(collection.nfts).some(existingNft => existingNft.tokenId === nft.tokenId)) {
-        collection.nfts.add(nft);
-        collection.totalNFTs = collection.nfts.size; // Update count based on actual size
-      }
+      collection.nfts.push(nft);
+      collection.totalNFTs = collection.nfts.length;
 
       acc.set(nft.tokenAddress, collection);
       return acc;
     }, new Map<string, NFTCollection>());
 
-    // Convert Set back to Array before returning
-    return Array.from(collections.values()).map(collection => ({
-      ...collection,
-      nfts: Array.from(collection.nfts),
-      totalNFTs: collection.nfts.size
-    }));
+    const result = Array.from(collections.values());
+    console.log("Final collections:", result.map(collection => ({
+      address: collection.address,
+      name: collection.name,
+      totalNFTs: collection.totalNFTs,
+      nftIds: collection.nfts.map(nft => nft.tokenId)
+    })));
+
+    return result;
   } catch (error) {
     console.error("Error fetching NFT collections:", error);
     throw error;
