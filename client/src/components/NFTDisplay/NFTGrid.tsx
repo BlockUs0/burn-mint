@@ -12,10 +12,10 @@ export function NFTGrid() {
     selectCollection,
     selectedNFTs,
     toggleNFTSelection,
-    setShowNFTGrid
   } = useNFTs();
 
   console.log("NFTGrid rendering with selectedCollection:", selectedCollection);
+  console.log("Selected collection data:", collections.find(c => c.address === selectedCollection));
 
   const selectedCollectionData = selectedCollection 
     ? collections.find(c => c.address === selectedCollection)
@@ -70,7 +70,7 @@ export function NFTGrid() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">
-          {selectedCollectionData.name}
+          {selectedCollectionData.name} ({selectedCollectionData.nfts.length} NFTs)
         </h2>
         <Button
           variant="ghost"
@@ -82,14 +82,17 @@ export function NFTGrid() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {selectedCollectionData.nfts.map((nft) => (
-          <NFTCard
-            key={`nft-${nft.tokenId}`}
-            nft={nft}
-            selected={selectedNFTs.has(nft.tokenId)}
-            onSelect={() => toggleNFTSelection(nft.tokenId)}
-          />
-        ))}
+        {selectedCollectionData.nfts.map((nft) => {
+          console.log("Rendering NFT:", nft);
+          return (
+            <NFTCard
+              key={`nft-${nft.tokenId}`}
+              nft={nft}
+              selected={selectedNFTs.has(nft.tokenId)}
+              onSelect={() => toggleNFTSelection(nft.tokenId)}
+            />
+          );
+        })}
       </div>
     </div>
   );
