@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import { Web3Provider } from "@/lib/web3Provider";
+import { NFTProvider } from "@/context/NFTContext";
 
 function Router() {
   return (
@@ -17,12 +18,14 @@ function Router() {
 
 function App() {
   return (
-    <Web3Provider>
-      <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
-      </QueryClientProvider>
-    </Web3Provider>
+    <QueryClientProvider client={queryClient}>
+      <Web3Provider>
+        <NFTProvider>
+          <Router />
+          <Toaster />
+        </NFTProvider>
+      </Web3Provider>
+    </QueryClientProvider>
   );
 }
 
