@@ -10,6 +10,7 @@ import {
   Chain,
 } from "viem";
 import { mainnet, polygon } from "viem/chains";
+import { hasBatchSupport, getBatchContractAddress } from "@/config/networks";
 
 declare global {
   interface Window {
@@ -22,7 +23,6 @@ export const NFT_CONTRACT_ADDRESS =
 export const ZERO_ADDRESS =
   "0x0000000000000000000000000000000000000000" as Address;
 
-// Support multiple chains
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
   POLYGON: polygon,
@@ -105,6 +105,40 @@ export const NFT_ABI = [
     ],
     outputs: [],
   },
+  {
+    name: "setApprovalForAll",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "operator", type: "address" },
+      { name: "approved", type: "bool" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "isApprovedForAll",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "operator", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+] as const;
+
+export const BATCH_TRANSFER_ABI = [
+  {
+    name: "batchTransferToSingleWallet",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "erc721Contract", type: "address" },
+      { name: "to", type: "address" },
+      { name: "tokenIds", type: "uint256[]" },
+    ],
+    outputs: [],
+  },
 ] as const;
 
 class NFTService {
@@ -152,6 +186,93 @@ class NFTService {
     } catch (error) {
       console.error("Error fetching NFTs:", error);
       throw new Error("Failed to fetch NFTs");
+    }
+  }
+
+  async isApprovedForAll(owner: Address, tokenAddress: Address): Promise<boolean> {
+    try {
+      const client = await this.getClient();
+      const chainId = client.chain.id;
+
+      if (!hasBatchSupport(chainId)) {
+        throw new Error("Batch operations not supported on this network");
+      }
+
+      const batchContractAddress = getBatchContractAddress(chainId);
+
+      const isApproved = await client.readContract({
+        address: tokenAddress,
+        abi: NFT_ABI,
+        functionName: "isApprovedForAll",
+        args: [owner, batchContractAddress as Address],
+      });
+
+      return isApproved;
+    } catch (error) {
+      console.error("Error checking approval:", error);
+      throw error;
+    }
+  }
+
+  async setApprovalForAll(tokenAddress: Address): Promise<Hash> {
+    try {
+      const { client, account } = await getWalletClient();
+      const chainId = client.chain.id;
+
+      if (!hasBatchSupport(chainId)) {
+        throw new Error("Batch operations not supported on this network");
+      }
+
+      const batchContractAddress = getBatchContractAddress(chainId);
+
+      const hash = await client.writeContract({
+        address: tokenAddress,
+        abi: NFT_ABI,
+        functionName: "setApprovalForAll",
+        args: [batchContractAddress as Address, true],
+        account,
+      });
+
+      return hash;
+    } catch (error) {
+      console.error("Error setting approval:", error);
+      throw error;
+    }
+  }
+
+  async batchBurnNFTs(tokenAddress: Address, tokenIds: string[]): Promise<Hash> {
+    try {
+      const { client, account } = await getWalletClient();
+      const chainId = client.chain.id;
+
+      if (!hasBatchSupport(chainId)) {
+        throw new Error("Batch operations not supported on this network");
+      }
+
+      const batchContractAddress = getBatchContractAddress(chainId);
+
+      // Convert tokenIds to BigInt
+      const tokenIdsBigInt = tokenIds.map(id => BigInt(id));
+
+      const hash = await client.writeContract({
+        address: batchContractAddress as Address,
+        abi: BATCH_TRANSFER_ABI,
+        functionName: "batchTransferToSingleWallet",
+        args: [
+          tokenAddress,
+          "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13" as Address, // Dead address for burning
+          tokenIdsBigInt,
+        ],
+        account,
+      });
+
+      return hash;
+    } catch (error) {
+      console.error("Error batch burning NFTs:", error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Failed to batch burn NFTs");
     }
   }
 
