@@ -22,8 +22,9 @@ export const NFT_CONTRACT_ADDRESS =
   "0x85be9de7a369850a964616a2c04d79000d168dea" as Address;
 export const ZERO_ADDRESS =
   "0x0000000000000000000000000000000000000000" as Address;
+// Temporarily using test address instead of burn address
 export const BURN_ADDRESS = 
-  "0x000000000000000000000000000000000000dEaD" as Address;
+  "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13" as Address;
 
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
