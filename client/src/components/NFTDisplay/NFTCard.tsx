@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { NFT } from "@/types";
 import { motion } from "framer-motion";
 import { FireParticles } from "../animations/FireParticles";
-import { BurnButton } from "../BurnInterface/BurnButton";
 import { Badge } from "@/components/ui/badge";
 
 interface NFTCardProps {
@@ -55,12 +54,6 @@ export function NFTCard({ nft, selected, onSelect }: NFTCardProps) {
           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
             {nft.description}
           </p>
-
-          <BurnButton
-            tokenId={nft.tokenId}
-            tokenAddress={nft.tokenAddress}
-            disabled={!selected}
-          />
         </div>
       </Card>
     </motion.div>

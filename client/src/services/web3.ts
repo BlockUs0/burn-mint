@@ -1,5 +1,4 @@
 import {
-  createConfig,
   createPublicClient,
   createWalletClient,
   custom,
@@ -143,51 +142,8 @@ export const BATCH_TRANSFER_ABI = [
 ] as const;
 
 class NFTService {
-  constructor() {}
-
   private async getClient() {
     return getPublicClient();
-  }
-
-  async getNFTs(address: Address) {
-    try {
-      const client = await this.getClient();
-
-      // Get token IDs owned by address
-      const tokenIds = await client.readContract({
-        address: NFT_CONTRACT_ADDRESS,
-        abi: NFT_ABI,
-        functionName: "tokensOfOwner",
-        args: [address],
-      });
-
-      // Fetch metadata for each token
-      const nfts = await Promise.all(
-        tokenIds.map(async (tokenId) => {
-          const uri = await client.readContract({
-            address: NFT_CONTRACT_ADDRESS,
-            abi: NFT_ABI,
-            functionName: "tokenURI",
-            args: [tokenId],
-          });
-
-          const metadata = await parseTokenUri(uri);
-
-          return {
-            tokenId: tokenId.toString(),
-            tokenAddress: NFT_CONTRACT_ADDRESS,
-            name: metadata.name,
-            description: metadata.description,
-            image: metadata.image,
-          };
-        }),
-      );
-
-      return nfts;
-    } catch (error) {
-      console.error("Error fetching NFTs:", error);
-      throw new Error("Failed to fetch NFTs");
-    }
   }
 
   async isApprovedForAll(owner: Address, tokenAddress: Address): Promise<boolean> {
@@ -277,63 +233,6 @@ class NFTService {
       }
       throw new Error("Failed to batch burn NFTs");
     }
-  }
-
-  async burnNFT(tokenAddress: Address, tokenId: string): Promise<Hash> {
-    try {
-      const { client, account } = await getWalletClient();
-      const chain = await getCurrentChain();
-
-      console.log(tokenAddress, tokenId);
-      if (!tokenAddress || !tokenId) {
-        throw new Error("Invalid token address or token ID");
-      }
-
-      // Log chain information for debugging
-      console.log("Current Chain:", client.chain);
-      console.log("Account:", account);
-      console.log("Token Address:", tokenAddress);
-      console.log("Token ID:", tokenId);
-
-      // Perform burn by sending to dead address
-      const hash = await client.writeContract({
-        address: tokenAddress,
-        abi: NFT_ABI,
-        functionName: "transferFrom",
-        args: [
-          account,
-          "0x4D483FB9Aa883956f05fb1CF0746B04e93170D13" as Address,
-          BigInt(tokenId),
-        ],
-        account,
-        chain
-      });
-
-      return hash;
-    } catch (error) {
-      console.error("Error burning NFT:", error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error("Failed to burn NFT");
-    }
-  }
-}
-
-async function parseTokenUri(uri: string) {
-  try {
-    // Handle IPFS URIs
-    const url = uri.startsWith("ipfs://")
-      ? `https://ipfs.io/ipfs/${uri.slice(7)}`
-      : uri;
-
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch metadata");
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error parsing token URI:", error);
-    throw new Error("Failed to parse token metadata");
   }
 }
 
