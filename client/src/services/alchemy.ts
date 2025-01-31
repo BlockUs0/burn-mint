@@ -74,6 +74,7 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     url.searchParams.append("owner", owner);
     url.searchParams.append("withMetadata", "true");
     url.searchParams.append("pageSize", pageSize.toString());
+    url.searchParams.append("refreshCache", "true"); // Force refresh cache
     if (pageKey) {
       url.searchParams.append("pageKey", pageKey);
     }
@@ -81,20 +82,14 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     const response = await fetchWithRetry(url.toString(), {
       headers: {
         Accept: "application/json",
+        "Cache-Control": "no-cache", // Prevent browser caching
       },
     });
 
     const data = await response.json();
-    console.log("Raw Alchemy API Response:", JSON.stringify(data, null, 2));
+    console.log(data); // Log raw response
 
     const nfts = data.ownedNfts.map((nft: any) => {
-      console.log("Processing NFT from Alchemy:", {
-        tokenId: nft.id.tokenId,
-        name: nft.name || nft.title,
-        contractAddress: nft.contract.address,
-        tokenType: nft.contractMetadata.tokenType
-      });
-
       let imageUrl = "";
       if (nft.image?.cachedUrl) {
         imageUrl = nft.image.cachedUrl;
@@ -156,25 +151,28 @@ export async function getNFTCollections(
   try {
     const nfts = await getNFTsForOwner(ownerAddress, chainId);
     console.log("Total NFTs fetched:", nfts.length);
-    console.log("All NFTs before grouping:", nfts.map(nft => ({
-      tokenId: nft.tokenId,
-      name: nft.name,
-      tokenAddress: nft.tokenAddress
-    })));
+    console.log(
+      "All NFTs before grouping:",
+      nfts.map((nft) => ({
+        tokenId: nft.tokenId,
+        name: nft.name,
+        tokenAddress: nft.tokenAddress,
+      })),
+    );
 
     const collections = nfts.reduce((acc, nft) => {
       console.log("Processing NFT for collection:", {
         tokenId: nft.tokenId,
         tokenAddress: nft.tokenAddress,
-        name: nft.name
+        name: nft.name,
       });
 
       const collection = acc.get(nft.tokenAddress) || {
         address: nft.tokenAddress,
-        name: nft.name.split('#')[0].trim(),
+        name: nft.name.split("#")[0].trim(),
         nfts: [],
         totalNFTs: 0,
-        chainId
+        chainId,
       };
 
       collection.nfts.push(nft);
@@ -185,12 +183,15 @@ export async function getNFTCollections(
     }, new Map<string, NFTCollection>());
 
     const result = Array.from(collections.values());
-    console.log("Final collections:", result.map(collection => ({
-      address: collection.address,
-      name: collection.name,
-      totalNFTs: collection.totalNFTs,
-      nftIds: collection.nfts.map(nft => nft.tokenId)
-    })));
+    console.log(
+      "Final collections:",
+      result.map((collection) => ({
+        address: collection.address,
+        name: collection.name,
+        totalNFTs: collection.totalNFTs,
+        nftIds: collection.nfts.map((nft) => nft.tokenId),
+      })),
+    );
 
     return result;
   } catch (error) {

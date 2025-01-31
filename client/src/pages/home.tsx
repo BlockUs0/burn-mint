@@ -5,7 +5,6 @@ import { useWallet } from "@/hooks/useWallet";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBurns } from "@/hooks/useBurns";
-import { useEffect } from "react";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
@@ -14,14 +13,6 @@ export default function Home() {
     walletAddress: address as `0x${string}`,
     limit: 10,
   });
-
-  useEffect(() => {
-    console.log("Home component state:", {
-      walletStatus,
-      isAuthenticated,
-      address
-    });
-  }, [walletStatus, isAuthenticated, address]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
