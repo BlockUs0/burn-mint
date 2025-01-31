@@ -19,7 +19,7 @@ export function NFTLayout() {
       {showNFTGrid ? (
         <div className="space-y-6">
           <NFTGrid />
-          {/* <BurnProgress />  */}
+          <BurnProgress />
         </div>
       ) : (
         <CollectionGrid />

@@ -82,16 +82,14 @@ export function NFTGrid() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {selectedCollectionData.nfts
-          .filter(nft => nft.tokenType !== "ERC1155")
-          .map((nft) => (
-            <NFTCard
-              key={`nft-${nft.tokenId}`}
-              nft={nft}
-              selected={selectedNFTs.has(nft.tokenId)}
-              onSelect={() => toggleNFTSelection(nft.tokenId)}
-            />
-          ))}
+        {selectedCollectionData.nfts.map((nft) => (
+          <NFTCard
+            key={`nft-${nft.tokenId}`}
+            nft={nft}
+            selected={selectedNFTs.has(nft.tokenId)}
+            onSelect={() => toggleNFTSelection(nft.tokenId)}
+          />
+        ))}
       </div>
     </div>
   );
