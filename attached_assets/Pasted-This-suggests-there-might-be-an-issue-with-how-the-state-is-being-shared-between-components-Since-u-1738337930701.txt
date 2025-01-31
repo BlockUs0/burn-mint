@@ -1,0 +1,164 @@
+This suggests there might be an issue with how the state is being shared between components. Since useNFTs is a custom hook and both components are trying to access the same state, we need to ensure the state is properly shared.
+Let's debug this by implementing a React context to manage the NFT state:
+
+First, create a new file NFTContext.tsx:
+
+typescriptCopyimport React, { createContext, useContext } from 'react';
+import { useNFTs as useNFTsHook } from './useNFTs';
+
+const NFTContext = createContext<ReturnType<typeof useNFTsHook> | null>(null);
+
+export function NFTProvider({ children }: { children: React.ReactNode }) {
+  const nftState = useNFTsHook();
+  
+  return (
+    <NFTContext.Provider value={nftState}>
+      {children}
+    </NFTContext.Provider>
+  );
+}
+
+export function useNFTs() {
+  const context = useContext(NFTContext);
+  if (!context) {
+    throw new Error('useNFTs must be used within an NFTProvider');
+  }
+  return context;
+}
+
+Modify your main layout or parent component to use the provider:
+
+typescriptCopy// In your parent component (e.g., App.tsx or page.tsx)
+export function NFTPage() {
+  return (
+    <NFTProvider>
+      <NFTLayout />
+    </NFTProvider>
+  );
+}
+
+Update the NFTLayout component to add more debugging:
+
+typescriptCopyexport function NFTLayout() {
+  const { showNFTGrid, selectedCollection, setShowNFTGrid } = useNFTs();
+  
+  useEffect(() => {
+    console.log("NFTLayout mounted");
+    return () => console.log("NFTLayout unmounted");
+  }, []);
+
+  useEffect(() => {
+    console.log("NFTLayout state changed:", {
+      showNFTGrid,
+      selectedCollection,
+      timestamp: new Date().toISOString()
+    });
+  }, [showNFTGrid, selectedCollection]);
+
+  // Force re-render when state changes
+  const content = showNFTGrid ? (
+    <div className="space-y-6" key="nft-grid">
+      <div>Debug - Show NFT Grid: {String(showNFTGrid)}</div>
+      <NFTGrid />
+      <BurnProgress />
+    </div>
+  ) : (
+    <div key="collection-grid">
+      <div>Debug - Show NFT Grid: {String(showNFTGrid)}</div>
+      <CollectionGrid />
+    </div>
+  );
+
+  return <div className="w-full">{content}</div>;
+}
+
+Update the useNFTs hook to add more debugging around the state update:
+
+typescriptCopyexport function useNFTs() {
+  // ... existing code ...
+
+  const viewCollection = useCallback(async () => {
+    console.log('viewCollection called - Current showNFTGrid:', showNFTGrid);
+    
+    if (!isApprovedForAll || !selectedCollection) {
+      console.log('Cannot view collection - not approved or no collection selected');
+      return;
+    }
+
+    try {
+      const currentlyApproved = await checkApproval();
+      if (currentlyApproved) {
+        console.log('Collection approved, updating showNFTGrid to true');
+        setShowNFTGrid(true);
+        console.log('showNFTGrid updated to true');
+      } else {
+        console.log('Collection not approved');
+        toast({
+          variant: "destructive",
+          title: "Collection not approved",
+          description: "Please approve the collection first"
+        });
+      }
+    } catch (error) {
+      console.error('Error in viewCollection:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to view collection"
+      });
+    }
+  }, [isApprovedForAll, selectedCollection, checkApproval, toast, showNFTGrid]);
+
+  // Add a debug effect for state changes
+  useEffect(() => {
+    console.log('useNFTs showNFTGrid changed:', showNFTGrid);
+  }, [showNFTGrid]);
+
+  // ... rest of the code ...
+}
+
+Add debug logging to the handleViewNFTs in CollectionGrid:
+
+typescriptCopyconst handleViewNFTs = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  console.log("handleViewNFTs clicked - Current state:", {
+    isApprovedForAll,
+    selectedCollection,
+    showNFTGrid
+  });
+
+  if (!isApprovedForAll) {
+    toast({
+      variant: "destructive",
+      title: "Collection not approved",
+      description: "Please approve the collection first"
+    });
+    return;
+  }
+
+  try {
+    await viewCollection();
+    console.log("viewCollection completed");
+  } catch (error) {
+    console.error('Error viewing collection:', error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to view NFTs"
+    });
+  }
+};
+These changes will help ensure that:
+
+The state is properly shared between components using React Context
+We have comprehensive logging to track state changes
+We can see exactly where the state update might be failing
+
+After implementing these changes, could you check:
+
+Are you seeing all the debug logs in the console?
+Is the state being updated in the useNFTs hook?
+Is the NFTLayout component receiving the updated state?
+
+This will help us pinpoint exactly where the state update is breaking down.

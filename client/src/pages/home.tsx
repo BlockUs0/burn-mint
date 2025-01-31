@@ -6,6 +6,7 @@ import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBurns } from "@/hooks/useBurns";
 import { useEffect } from "react";
+import { NFTProvider } from "@/context/NFTContext";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
@@ -54,20 +55,22 @@ export default function Home() {
               </p>
             </div>
           ) : walletStatus === "connected" && isAuthenticated ? (
-            <Tabs defaultValue="nfts" className="space-y-6">
-              <TabsList className="grid w-[400px] grid-cols-2">
-                <TabsTrigger value="nfts">NFTs</TabsTrigger>
-                <TabsTrigger value="history">Burn History</TabsTrigger>
-              </TabsList>
+            <NFTProvider>
+              <Tabs defaultValue="nfts" className="space-y-6">
+                <TabsList className="grid w-[400px] grid-cols-2">
+                  <TabsTrigger value="nfts">NFTs</TabsTrigger>
+                  <TabsTrigger value="history">Burn History</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="nfts" className="space-y-6" forceMount>
-                <NFTLayout />
-              </TabsContent>
+                <TabsContent value="nfts" className="space-y-6" forceMount>
+                  <NFTLayout />
+                </TabsContent>
 
-              <TabsContent value="history">
-                <BurnHistory burns={burns?.items || []} />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="history">
+                  <BurnHistory burns={burns?.items || []} />
+                </TabsContent>
+              </Tabs>
+            </NFTProvider>
           ) : (
             <div className="text-center py-20">
               <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
