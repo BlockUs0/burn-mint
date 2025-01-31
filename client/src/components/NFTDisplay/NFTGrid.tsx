@@ -11,12 +11,17 @@ export function NFTGrid() {
     selectedCollection,
     selectCollection,
     selectedNFTs,
-    toggleNFTSelection
+    toggleNFTSelection,
+    setShowNFTGrid
   } = useNFTs();
 
   const selectedCollectionData = selectedCollection 
     ? collections.find(c => c.address === selectedCollection)
     : null;
+
+  const handleBack = () => {
+    selectCollection(''); // This will reset selectedCollection and showNFTGrid
+  };
 
   if (loading) {
     return (
@@ -50,7 +55,7 @@ export function NFTGrid() {
         <Button
           variant="ghost"
           className="mt-4"
-          onClick={() => selectCollection('')}
+          onClick={handleBack}
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to Collections
@@ -67,7 +72,7 @@ export function NFTGrid() {
         </h2>
         <Button
           variant="ghost"
-          onClick={() => selectCollection('')}
+          onClick={handleBack}
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to Collections

@@ -57,7 +57,10 @@ export function useNFTs() {
       if (!address || !selectedCollection || !chain?.id) return;
 
       try {
-        const isApproved = await nftService.isApprovedForAll(address, selectedCollection as `0x${string}`);
+        const isApproved = await nftService.isApprovedForAll(
+          address,
+          selectedCollection as `0x${string}`
+        );
         setIsApprovedForAll(isApproved);
       } catch (error) {
         console.error('Error checking approval:', error);
@@ -109,6 +112,7 @@ export function useNFTs() {
     toggleNFTSelection,
     isApprovedForAll,
     showNFTGrid,
-    viewCollection
+    viewCollection,
+    setShowNFTGrid // Export this to allow going back to collection view
   };
 }
