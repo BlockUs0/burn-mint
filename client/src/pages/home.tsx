@@ -1,41 +1,18 @@
 import { WalletButton } from "@/components/WalletConnection/WalletButton";
-import { NFTGrid } from "@/components/NFTDisplay/NFTGrid";
-import { CollectionGrid } from "@/components/NFTDisplay/CollectionGrid";
-import { BurnProgress } from "@/components/BurnInterface/BurnProgress";
+import { NFTLayout } from "@/components/NFTDisplay/NFTLayout";
+import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
 import { useWallet } from "@/hooks/useWallet";
-import { useNFTs } from "@/hooks/useNFTs";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
 import { useBurns } from "@/hooks/useBurns";
-import { useEffect, useState, useCallback } from "react";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
-  const { showNFTGrid } = useNFTs();
   const isAuthenticated = !!localStorage.getItem("auth_token");
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
     limit: 10,
   });
-
-  // Monitor showNFTGrid changes
-  useEffect(() => {
-    console.log("showNFTGrid changed in Home:", showNFTGrid);
-  }, [showNFTGrid]);
-
-  const renderNFTContent = useCallback(() => {
-    console.log("Rendering content, showNFTGrid:", showNFTGrid);
-    if (showNFTGrid) {
-      return (
-        <>
-          <NFTGrid />
-          <BurnProgress />
-        </>
-      );
-    }
-    return <CollectionGrid />;
-  }, [showNFTGrid]); // Only depend on showNFTGrid
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -75,7 +52,7 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6">
-                {renderNFTContent()}
+                <NFTLayout />
               </TabsContent>
 
               <TabsContent value="history">
