@@ -1,4 +1,4 @@
-import { useNFTs } from "@/hooks/useNFTs";
+import { useNFTs } from "@/context/NFTContext";
 import { NFTCard } from "./NFTCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Loader2, ChevronLeft } from "lucide-react";
@@ -22,7 +22,7 @@ export function NFTGrid() {
     : null;
 
   const handleBack = () => {
-    selectCollection(''); // This will reset selectedCollection and showNFTGrid
+    selectCollection(''); 
   };
 
   if (loading) {

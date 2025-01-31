@@ -1,4 +1,4 @@
-import { useNFTs } from "@/hooks/useNFTs";
+import { useNFTs } from "@/context/NFTContext";
 import { NFTGrid } from "./NFTGrid";
 import { CollectionGrid } from "./CollectionGrid";
 import { BurnProgress } from "../BurnInterface/BurnProgress";
@@ -10,7 +10,7 @@ export function NFTLayout() {
   useEffect(() => {
     console.log("NFTLayout state changed:", {
       showNFTGrid,
-      selectedCollection
+      selectedCollection,
     });
   }, [showNFTGrid, selectedCollection]);
 
@@ -19,7 +19,7 @@ export function NFTLayout() {
       {showNFTGrid ? (
         <div className="space-y-6">
           <NFTGrid />
-          <BurnProgress />
+          {/* <BurnProgress />  */}
         </div>
       ) : (
         <CollectionGrid />

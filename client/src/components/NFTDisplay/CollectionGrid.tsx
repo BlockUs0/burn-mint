@@ -1,4 +1,4 @@
-import { useNFTs } from "@/hooks/useNFTs";
+import { useNFTs } from "@/context/NFTContext";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Loader2, Check } from "lucide-react";
@@ -46,7 +46,6 @@ export function CollectionGrid() {
   const handleViewNFTs = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("View NFTs clicked - Current approval status:", isApprovedForAll);
 
     if (!isApprovedForAll) {
       toast({
