@@ -1,7 +1,9 @@
 import { WalletButton } from "@/components/WalletConnection/WalletButton";
 import { NFTGrid } from "@/components/NFTDisplay/NFTGrid";
+import { CollectionGrid } from "@/components/NFTDisplay/CollectionGrid";
 import { BurnProgress } from "@/components/BurnInterface/BurnProgress";
 import { useWallet } from "@/hooks/useWallet";
+import { useNFTs } from "@/hooks/useNFTs";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
@@ -9,11 +11,37 @@ import { useBurns } from "@/hooks/useBurns";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
+  const { selectedCollection, isApprovedForAll } = useNFTs();
   const isAuthenticated = !!localStorage.getItem('auth_token');
   const { burns } = useBurns({ 
     walletAddress: address,
     limit: 10 
   });
+
+  const renderNFTContent = () => {
+    if (!selectedCollection) {
+      return <CollectionGrid />;
+    }
+
+    if (!isApprovedForAll) {
+      return (
+        <div className="text-center py-12">
+          <LockIcon className="w-12 h-12 mx-auto mb-4 text-orange-500" />
+          <h3 className="text-lg font-semibold mb-2">Approval Required</h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Please approve the collection for batch operations to continue
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <NFTGrid />
+        <BurnProgress />
+      </>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -49,8 +77,7 @@ export default function Home() {
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6">
-                <NFTGrid />
-                <BurnProgress />
+                {renderNFTContent()}
               </TabsContent>
 
               <TabsContent value="history">
