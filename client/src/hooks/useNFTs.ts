@@ -71,14 +71,20 @@ export function useNFTs() {
   const selectCollection = (address: string) => {
     if (address === '') {
       setShowNFTGrid(false);
+      setSelectedCollection(null);
+    } else {
+      setSelectedCollection(address);
+      // Reset NFT selection when changing collection
+      setSelectedNFTs(new Set());
     }
-    setSelectedCollection(prev => prev === address ? null : address);
-    setSelectedNFTs(new Set()); // Clear NFT selection when changing collection
+    console.log('Collection selected:', address);
   };
 
   const viewCollection = () => {
-    if (isApprovedForAll) {
+    console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
+    if (isApprovedForAll && selectedCollection) {
       setShowNFTGrid(true);
+      console.log('Showing NFT grid');
     }
   };
 

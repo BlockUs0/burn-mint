@@ -38,8 +38,15 @@ export function CollectionGrid() {
   };
 
   const handleViewNFTs = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any default behavior
     e.stopPropagation(); // Prevent card click
+    console.log('View NFTs clicked');
     viewCollection();
+  };
+
+  const handleCollectionSelect = (address: string) => {
+    console.log('Collection card clicked:', address);
+    selectCollection(address);
   };
 
   if (loading) {
@@ -89,7 +96,7 @@ export function CollectionGrid() {
               relative p-4 cursor-pointer
               ${selectedCollection === collection.address ? "ring-2 ring-primary" : ""}
             `}
-            onClick={() => selectCollection(collection.address)}
+            onClick={() => handleCollectionSelect(collection.address)}
           >
             <div className="flex justify-between items-start mb-2">
               <div>
