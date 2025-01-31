@@ -2,12 +2,15 @@ import { useNFTs } from "@/hooks/useNFTs";
 import { NFTGrid } from "./NFTGrid";
 import { CollectionGrid } from "./CollectionGrid";
 import { BurnProgress } from "../BurnInterface/BurnProgress";
+import { useEffect } from "react";
 
 export function NFTLayout() {
   const { showNFTGrid } = useNFTs();
 
-  console.log("NFTLayout rendering, showNFTGrid:", showNFTGrid);
-  
+  useEffect(() => {
+    console.log("NFTLayout re-rendering with showNFTGrid:", showNFTGrid);
+  }, [showNFTGrid]);
+
   if (showNFTGrid) {
     return (
       <div className="space-y-6">

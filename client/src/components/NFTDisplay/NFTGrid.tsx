@@ -15,6 +15,8 @@ export function NFTGrid() {
     setShowNFTGrid
   } = useNFTs();
 
+  console.log("NFTGrid rendering with selectedCollection:", selectedCollection);
+
   const selectedCollectionData = selectedCollection 
     ? collections.find(c => c.address === selectedCollection)
     : null;
