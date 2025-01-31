@@ -19,7 +19,8 @@ export function CollectionGrid() {
   } = useNFTs();
   const { toast } = useToast();
 
-  const handleApproval = async (collectionAddress: string) => {
+  const handleApproval = async (collectionAddress: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
     try {
       await nftService.setApprovalForAll(collectionAddress as `0x${string}`);
       toast({
@@ -34,6 +35,11 @@ export function CollectionGrid() {
         description: (error as Error).message
       });
     }
+  };
+
+  const handleViewNFTs = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    viewCollection();
   };
 
   if (loading) {
@@ -111,10 +117,7 @@ export function CollectionGrid() {
                       variant="secondary"
                       size="sm"
                       className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        viewCollection();
-                      }}
+                      onClick={handleViewNFTs}
                     >
                       View NFTs
                     </Button>
@@ -124,10 +127,7 @@ export function CollectionGrid() {
                     variant="secondary"
                     size="sm"
                     className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleApproval(collection.address);
-                    }}
+                    onClick={(e) => handleApproval(collection.address, e)}
                   >
                     Approve Collection
                   </Button>
