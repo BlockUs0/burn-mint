@@ -11,7 +11,7 @@ import { useBurns } from "@/hooks/useBurns";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
-  const { selectedCollection, isApprovedForAll } = useNFTs();
+  const { selectedCollection, isApprovedForAll, showNFTGrid } = useNFTs();
   const isAuthenticated = !!localStorage.getItem('auth_token');
   const { burns } = useBurns({ 
     walletAddress: address,
@@ -19,20 +19,8 @@ export default function Home() {
   });
 
   const renderNFTContent = () => {
-    if (!selectedCollection) {
+    if (!showNFTGrid) {
       return <CollectionGrid />;
-    }
-
-    if (!isApprovedForAll) {
-      return (
-        <div className="text-center py-12">
-          <LockIcon className="w-12 h-12 mx-auto mb-4 text-orange-500" />
-          <h3 className="text-lg font-semibold mb-2">Approval Required</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Please approve the collection for batch operations to continue
-          </p>
-        </div>
-      );
     }
 
     return (

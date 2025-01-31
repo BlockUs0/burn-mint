@@ -13,6 +13,7 @@ export function useNFTs() {
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [selectedNFTs, setSelectedNFTs] = useState<Set<string>>(new Set());
   const [isApprovedForAll, setIsApprovedForAll] = useState(false);
+  const [showNFTGrid, setShowNFTGrid] = useState(false);
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem('auth_token');
 
@@ -63,12 +64,22 @@ export function useNFTs() {
       setSelectedCollection(null);
       setSelectedNFTs(new Set());
       setIsApprovedForAll(false);
+      setShowNFTGrid(false);
     }
   }, [status, isAuthenticated]);
 
   const selectCollection = (address: string) => {
+    if (address === '') {
+      setShowNFTGrid(false);
+    }
     setSelectedCollection(prev => prev === address ? null : address);
     setSelectedNFTs(new Set()); // Clear NFT selection when changing collection
+  };
+
+  const viewCollection = () => {
+    if (isApprovedForAll) {
+      setShowNFTGrid(true);
+    }
   };
 
   const toggleNFTSelection = (tokenId: string) => {
@@ -91,6 +102,8 @@ export function useNFTs() {
     selectCollection,
     selectedNFTs,
     toggleNFTSelection,
-    isApprovedForAll
+    isApprovedForAll,
+    showNFTGrid,
+    viewCollection
   };
 }

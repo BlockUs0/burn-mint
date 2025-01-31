@@ -14,7 +14,8 @@ export function CollectionGrid() {
     loading, 
     selectedCollection, 
     selectCollection,
-    isApprovedForAll 
+    isApprovedForAll,
+    viewCollection 
   } = useNFTs();
   const { toast } = useToast();
 
@@ -99,12 +100,25 @@ export function CollectionGrid() {
             </div>
 
             {selectedCollection === collection.address && (
-              <div className="mt-4">
+              <div className="mt-4 space-y-2">
                 {isApprovedForAll ? (
-                  <div className="flex items-center text-sm text-green-500">
-                    <Check className="w-4 h-4 mr-2" />
-                    Approved for batch operations
-                  </div>
+                  <>
+                    <div className="flex items-center text-sm text-green-500 mb-2">
+                      <Check className="w-4 h-4 mr-2" />
+                      Approved for batch operations
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        viewCollection();
+                      }}
+                    >
+                      View NFTs
+                    </Button>
+                  </>
                 ) : (
                   <Button
                     variant="secondary"
