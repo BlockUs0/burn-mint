@@ -24,14 +24,14 @@ export function CollectionGrid() {
     collectionAddress: string,
     e: React.MouseEvent,
   ) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     try {
+      console.log("Starting approval process for:", collectionAddress);
       await nftService.setApprovalForAll(collectionAddress as `0x${string}`);
       toast({
         title: "Approval Successful",
         description: "You can now batch burn NFTs from this collection",
       });
-      // Recheck approval status after successful approval
       await checkApproval();
     } catch (error) {
       console.error("Error setting approval:", error);
@@ -46,7 +46,7 @@ export function CollectionGrid() {
   const handleViewNFTs = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("View NFTs clicked");
+    console.log("View NFTs clicked - Current approval status:", isApprovedForAll);
 
     if (!isApprovedForAll) {
       toast({
@@ -58,7 +58,9 @@ export function CollectionGrid() {
     }
 
     try {
+      console.log("Attempting to view collection");
       await viewCollection();
+      console.log("ViewCollection function completed");
     } catch (error) {
       console.error('Error viewing collection:', error);
       toast({
@@ -70,7 +72,7 @@ export function CollectionGrid() {
   };
 
   const handleCollectionSelect = (address: string) => {
-    console.log("Collection card clicked:", address);
+    console.log("Collection select triggered for:", address);
     selectCollection(address);
   };
 

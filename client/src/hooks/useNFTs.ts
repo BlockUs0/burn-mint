@@ -49,7 +49,6 @@ export function useNFTs() {
     staleTime: 30000,
   });
 
-  // Check approval status whenever collection changes
   const checkApproval = useCallback(async () => {
     if (!address || !selectedCollection || !chain?.id) return;
 
@@ -74,7 +73,6 @@ export function useNFTs() {
     }
   }, [address, selectedCollection, chain?.id, toast]);
 
-  // Reset selections when wallet disconnects or auth status changes
   useEffect(() => {
     if (status !== "connected" || !isAuthenticated) {
       setSelectedCollection(null);
@@ -84,21 +82,19 @@ export function useNFTs() {
     }
   }, [status, isAuthenticated]);
 
-  // Check approval status whenever collection changes
   useEffect(() => {
     checkApproval();
   }, [checkApproval]);
 
   const selectCollection = useCallback(
     (address: string) => {
-      setShowNFTGrid(false); // Always reset grid view when selecting new collection
+      setShowNFTGrid(false);
       if (address === "") {
         setSelectedCollection(null);
       } else {
         setSelectedCollection(address);
         setSelectedNFTs(new Set());
-        // Force approval check when selecting new collection
-        checkApproval(); // Removed setTimeout
+        checkApproval();
       }
       console.log("Collection selected:", address);
     },
@@ -121,7 +117,7 @@ export function useNFTs() {
       const currentlyApproved = await checkApproval();
       if (currentlyApproved) {
         console.log('Collection approved, showing NFT grid');
-        setShowNFTGrid(true); // Remove the setTimeout pattern
+        setShowNFTGrid(true);
       } else {
         console.log('Collection not approved');
         toast({
@@ -152,7 +148,6 @@ export function useNFTs() {
     });
   }, []);
 
-  // Debug effect to monitor state changes
   useEffect(() => {
     console.log("State updated:", {
       showNFTGrid,
