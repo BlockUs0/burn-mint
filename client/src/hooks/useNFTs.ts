@@ -17,7 +17,7 @@ export function useNFTs() {
   const { toast } = useToast();
   const isAuthenticated = !!localStorage.getItem('auth_token');
 
-  const { data: collections = [], isLoading: loading, error } = useQuery({
+  const { data: collections = [], isLoading: loading, error, refetch } = useQuery({
     queryKey: ['collections', address, chain?.id],
     queryFn: async () => {
       try {
@@ -41,6 +41,29 @@ export function useNFTs() {
     staleTime: 30000,
   });
 
+  // Check approval status whenever collection changes
+  const checkApproval = useCallback(async () => {
+    if (!address || !selectedCollection || !chain?.id) return;
+
+    try {
+      console.log('Checking approval for:', selectedCollection);
+      const isApproved = await nftService.isApprovedForAll(
+        address,
+        selectedCollection as `0x${string}`
+      );
+      console.log('Approval status:', isApproved);
+      setIsApprovedForAll(isApproved);
+    } catch (error) {
+      console.error('Error checking approval:', error);
+      setIsApprovedForAll(false);
+      toast({
+        variant: "destructive",
+        title: "Error checking approval status",
+        description: "Please try selecting the collection again"
+      });
+    }
+  }, [address, selectedCollection, chain?.id, toast]);
+
   // Reset selections when wallet disconnects or auth status changes
   useEffect(() => {
     if (status !== 'connected' || !isAuthenticated) {
@@ -53,23 +76,8 @@ export function useNFTs() {
 
   // Check approval status whenever collection changes
   useEffect(() => {
-    async function checkApproval() {
-      if (!address || !selectedCollection || !chain?.id) return;
-
-      try {
-        const isApproved = await nftService.isApprovedForAll(
-          address,
-          selectedCollection as `0x${string}`
-        );
-        setIsApprovedForAll(isApproved);
-      } catch (error) {
-        console.error('Error checking approval:', error);
-        setIsApprovedForAll(false);
-      }
-    }
-
     checkApproval();
-  }, [selectedCollection, address, chain?.id]);
+  }, [checkApproval]);
 
   const selectCollection = useCallback((address: string) => {
     if (address === '') {
@@ -79,9 +87,11 @@ export function useNFTs() {
       setSelectedCollection(address);
       setSelectedNFTs(new Set());
       setShowNFTGrid(false);
+      // Force approval check when selecting new collection
+      setTimeout(() => checkApproval(), 500);
     }
     console.log('Collection selected:', address);
-  }, []);
+  }, [checkApproval]);
 
   const viewCollection = useCallback(() => {
     console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
@@ -122,6 +132,7 @@ export function useNFTs() {
     selectedNFTs,
     toggleNFTSelection,
     isApprovedForAll,
+    checkApproval,
     showNFTGrid,
     viewCollection,
     setShowNFTGrid

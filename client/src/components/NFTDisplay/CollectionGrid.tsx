@@ -16,9 +16,10 @@ export function CollectionGrid() {
     selectCollection,
     isApprovedForAll,
     viewCollection,
+    checkApproval,
   } = useNFTs();
   const { toast } = useToast();
-  
+
   const handleApproval = async (
     collectionAddress: string,
     e: React.MouseEvent,
@@ -30,6 +31,8 @@ export function CollectionGrid() {
         title: "Approval Successful",
         description: "You can now batch burn NFTs from this collection",
       });
+      // Recheck approval status after successful approval
+      await checkApproval();
     } catch (error) {
       console.error("Error setting approval:", error);
       toast({
@@ -41,10 +44,18 @@ export function CollectionGrid() {
   };
 
   const handleViewNFTs = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent any default behavior
-    e.stopPropagation(); // Prevent card click
+    e.preventDefault();
+    e.stopPropagation();
     console.log("View NFTs clicked");
-    viewCollection();
+    if (isApprovedForAll) {
+      viewCollection();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Collection not approved",
+        description: "Please approve the collection first",
+      });
+    }
   };
 
   const handleCollectionSelect = (address: string) => {
