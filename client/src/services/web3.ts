@@ -14,7 +14,7 @@ import { hasBatchSupport, getBatchContractAddress } from "@/config/networks";
 
 declare global {
   interface Window {
-    ethereum: any;
+    ethereum?: any;
   }
 }
 
@@ -192,9 +192,9 @@ class NFTService {
   async isApprovedForAll(owner: Address, tokenAddress: Address): Promise<boolean> {
     try {
       const client = await this.getClient();
-      const chainId = client.chain.id;
+      const chainId = client.chain?.id;
 
-      if (!hasBatchSupport(chainId)) {
+      if (!chainId || !hasBatchSupport(chainId)) {
         throw new Error("Batch operations not supported on this network");
       }
 
@@ -217,13 +217,13 @@ class NFTService {
   async setApprovalForAll(tokenAddress: Address): Promise<Hash> {
     try {
       const { client, account } = await getWalletClient();
-      const chainId = client.chain.id;
+      const chain = await getCurrentChain();
 
-      if (!hasBatchSupport(chainId)) {
+      if (!hasBatchSupport(chain.id)) {
         throw new Error("Batch operations not supported on this network");
       }
 
-      const batchContractAddress = getBatchContractAddress(chainId);
+      const batchContractAddress = getBatchContractAddress(chain.id);
 
       const hash = await client.writeContract({
         address: tokenAddress,
@@ -231,6 +231,7 @@ class NFTService {
         functionName: "setApprovalForAll",
         args: [batchContractAddress as Address, true],
         account,
+        chain
       });
 
       return hash;
@@ -243,13 +244,13 @@ class NFTService {
   async batchBurnNFTs(tokenAddress: Address, tokenIds: string[]): Promise<Hash> {
     try {
       const { client, account } = await getWalletClient();
-      const chainId = client.chain.id;
+      const chain = await getCurrentChain();
 
-      if (!hasBatchSupport(chainId)) {
+      if (!hasBatchSupport(chain.id)) {
         throw new Error("Batch operations not supported on this network");
       }
 
-      const batchContractAddress = getBatchContractAddress(chainId);
+      const batchContractAddress = getBatchContractAddress(chain.id);
 
       // Convert tokenIds to BigInt
       const tokenIdsBigInt = tokenIds.map(id => BigInt(id));
@@ -264,6 +265,7 @@ class NFTService {
           tokenIdsBigInt,
         ],
         account,
+        chain
       });
 
       return hash;
@@ -279,6 +281,7 @@ class NFTService {
   async burnNFT(tokenAddress: Address, tokenId: string): Promise<Hash> {
     try {
       const { client, account } = await getWalletClient();
+      const chain = await getCurrentChain();
 
       console.log(tokenAddress, tokenId);
       if (!tokenAddress || !tokenId) {
@@ -302,14 +305,14 @@ class NFTService {
           BigInt(tokenId),
         ],
         account,
-        chain: client.chain,
+        chain
       });
 
       return hash;
     } catch (error) {
       console.error("Error burning NFT:", error);
       if (error instanceof Error) {
-        throw error; // Preserve the original error message
+        throw error;
       }
       throw new Error("Failed to burn NFT");
     }
@@ -333,6 +336,5 @@ async function parseTokenUri(uri: string) {
   }
 }
 
-// Initialize and export default instance
 const nftService = new NFTService();
 export default nftService;
