@@ -142,24 +142,33 @@ export async function getNFTCollections(
 ): Promise<NFTCollection[]> {
   try {
     const nfts = await getNFTsForOwner(ownerAddress, chainId);
+    console.log("Total NFTs fetched:", nfts.length);
 
     const collections = nfts.reduce((acc, nft) => {
       const collection = acc.get(nft.tokenAddress) || {
         address: nft.tokenAddress,
         name: nft.name.split('#')[0].trim(),
-        nfts: [],
+        nfts: new Set(), // Use Set for unique NFTs
         totalNFTs: 0,
         chainId
       };
 
-      collection.nfts.push(nft);
-      collection.totalNFTs++;
+      // Only add NFT if it's not already in the collection
+      if (!Array.from(collection.nfts).some(existingNft => existingNft.tokenId === nft.tokenId)) {
+        collection.nfts.add(nft);
+        collection.totalNFTs = collection.nfts.size; // Update count based on actual size
+      }
 
       acc.set(nft.tokenAddress, collection);
       return acc;
     }, new Map<string, NFTCollection>());
 
-    return Array.from(collections.values());
+    // Convert Set back to Array before returning
+    return Array.from(collections.values()).map(collection => ({
+      ...collection,
+      nfts: Array.from(collection.nfts),
+      totalNFTs: collection.nfts.size
+    }));
   } catch (error) {
     console.error("Error fetching NFT collections:", error);
     throw error;
