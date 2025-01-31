@@ -5,25 +5,24 @@ import { BurnProgress } from "../BurnInterface/BurnProgress";
 import { useEffect } from "react";
 
 export function NFTLayout() {
-  const { showNFTGrid } = useNFTs();
+  const { showNFTGrid, selectedCollection } = useNFTs();
 
   useEffect(() => {
-    console.log("NFTLayout re-rendering with showNFTGrid:", showNFTGrid);
-    return () => {
-      console.log("NFTLayout cleanup");
-    };
-  }, [showNFTGrid]);
+    console.log("NFTLayout re-rendering with:", {
+      showNFTGrid,
+      selectedCollection
+    });
+  }, [showNFTGrid, selectedCollection]);
 
-  if (showNFTGrid) {
-    return (
-      <div className="space-y-6">
-        <NFTGrid />
-        <BurnProgress />
-      </div>
-    );
-  }
+  // Force re-render when showNFTGrid changes
+  const content = showNFTGrid ? (
+    <div className="space-y-6" key="nft-grid">
+      <NFTGrid />
+      <BurnProgress />
+    </div>
+  ) : (
+    <CollectionGrid key="collection-grid" />
+  );
 
-  return <CollectionGrid />;
+  return content;
 }
-
-export default NFTLayout;

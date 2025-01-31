@@ -96,19 +96,37 @@ export function useNFTs() {
 
   const viewCollection = useCallback(async () => {
     console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
-    if (isApprovedForAll && selectedCollection) {
+    if (!isApprovedForAll || !selectedCollection) {
+      console.log('Cannot view collection - not approved or no collection selected');
+      return;
+    }
+
+    try {
       // Double check approval before showing grid
       const currentlyApproved = await checkApproval();
       if (currentlyApproved) {
-        setShowNFTGrid(true);
-        console.log('Showing NFT grid');
+        console.log('Collection approved, showing NFT grid');
+        // Force state update
+        setShowNFTGrid(false);
+        setTimeout(() => {
+          setShowNFTGrid(true);
+          console.log('NFT grid visibility updated');
+        }, 0);
       } else {
+        console.log('Collection not approved');
         toast({
           variant: "destructive",
           title: "Collection not approved",
           description: "Please approve the collection first"
         });
       }
+    } catch (error) {
+      console.error('Error in viewCollection:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to view collection"
+      });
     }
   }, [isApprovedForAll, selectedCollection, checkApproval, toast]);
 

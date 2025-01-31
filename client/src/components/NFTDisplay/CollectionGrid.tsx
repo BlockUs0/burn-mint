@@ -43,17 +43,28 @@ export function CollectionGrid() {
     }
   };
 
-  const handleViewNFTs = (e: React.MouseEvent) => {
+  const handleViewNFTs = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log("View NFTs clicked");
-    if (isApprovedForAll) {
-      viewCollection();
-    } else {
+
+    if (!isApprovedForAll) {
       toast({
         variant: "destructive",
         title: "Collection not approved",
         description: "Please approve the collection first",
+      });
+      return;
+    }
+
+    try {
+      await viewCollection();
+    } catch (error) {
+      console.error('Error viewing collection:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to view NFTs"
       });
     }
   };
