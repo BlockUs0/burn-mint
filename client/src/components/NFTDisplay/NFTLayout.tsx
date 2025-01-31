@@ -9,6 +9,9 @@ export function NFTLayout() {
 
   useEffect(() => {
     console.log("NFTLayout re-rendering with showNFTGrid:", showNFTGrid);
+    return () => {
+      console.log("NFTLayout cleanup");
+    };
   }, [showNFTGrid]);
 
   if (showNFTGrid) {
@@ -22,3 +25,5 @@ export function NFTLayout() {
 
   return <CollectionGrid />;
 }
+
+export default NFTLayout;

@@ -53,6 +53,7 @@ export function useNFTs() {
       );
       console.log('Approval status:', isApproved);
       setIsApprovedForAll(isApproved);
+      return isApproved;
     } catch (error) {
       console.error('Error checking approval:', error);
       setIsApprovedForAll(false);
@@ -61,6 +62,7 @@ export function useNFTs() {
         title: "Error checking approval status",
         description: "Please try selecting the collection again"
       });
+      return false;
     }
   }, [address, selectedCollection, chain?.id, toast]);
 
@@ -80,26 +82,35 @@ export function useNFTs() {
   }, [checkApproval]);
 
   const selectCollection = useCallback((address: string) => {
+    setShowNFTGrid(false); // Always reset grid view when selecting new collection
     if (address === '') {
       setSelectedCollection(null);
-      setShowNFTGrid(false);
     } else {
       setSelectedCollection(address);
       setSelectedNFTs(new Set());
-      setShowNFTGrid(false);
       // Force approval check when selecting new collection
       setTimeout(() => checkApproval(), 500);
     }
     console.log('Collection selected:', address);
   }, [checkApproval]);
 
-  const viewCollection = useCallback(() => {
+  const viewCollection = useCallback(async () => {
     console.log('View Collection triggered', { isApprovedForAll, selectedCollection });
     if (isApprovedForAll && selectedCollection) {
-      setShowNFTGrid(true);
-      console.log('Showing NFT grid');
+      // Double check approval before showing grid
+      const currentlyApproved = await checkApproval();
+      if (currentlyApproved) {
+        setShowNFTGrid(true);
+        console.log('Showing NFT grid');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Collection not approved",
+          description: "Please approve the collection first"
+        });
+      }
     }
-  }, [isApprovedForAll, selectedCollection]);
+  }, [isApprovedForAll, selectedCollection, checkApproval, toast]);
 
   const toggleNFTSelection = useCallback((tokenId: string) => {
     setSelectedNFTs(prev => {
