@@ -8,6 +8,14 @@ export interface NFT {
   balance?: string;
 }
 
+export interface NFTCollection {
+  address: string;
+  name: string;
+  nfts: NFT[];
+  totalNFTs: number;
+  chainId: number;
+}
+
 export type WalletState = {
   status: 'disconnected' | 'connecting' | 'connected' | 'authenticating' | 'error';
   address: string | null;
@@ -17,14 +25,17 @@ export type WalletState = {
 export type NFTDisplayState = {
   loading: boolean;
   error: Error | null;
-  nfts: NFT[];
-  selectedNFT: string | null;
+  collections: NFTCollection[];
+  selectedCollection: string | null;
+  selectedNFTs: Set<string>;
+  isApprovedForAll: boolean;
 };
 
 export type BurnState = {
-  status: 'idle' | 'burning' | 'completed' | 'error';
+  status: 'idle' | 'approving' | 'burning' | 'completed' | 'error';
   burnCount: number;
   canMint: boolean;
+  error?: string;
 };
 
 export interface BurnRecord {

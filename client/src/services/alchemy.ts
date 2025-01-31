@@ -1,4 +1,4 @@
-import { NFT } from "@/types";
+import { NFT, NFTCollection } from "@/types";
 import {
   networks,
   type SupportedChainId,
@@ -68,6 +68,37 @@ async function fetchWithRetry(
   }
 }
 
+export async function getNFTCollections(
+  ownerAddress: string,
+  chainId: number,
+): Promise<NFTCollection[]> {
+  try {
+    const nfts = await getNFTsForOwner(ownerAddress, chainId);
+
+    // Group NFTs by contract address
+    const collections = nfts.reduce((acc, nft) => {
+      const collection = acc.get(nft.tokenAddress) || {
+        address: nft.tokenAddress,
+        name: nft.name.split('#')[0].trim(), // Use the name before '#' as collection name
+        nfts: [],
+        totalNFTs: 0,
+        chainId
+      };
+
+      collection.nfts.push(nft);
+      collection.totalNFTs++;
+
+      acc.set(nft.tokenAddress, collection);
+      return acc;
+    }, new Map<string, NFTCollection>());
+
+    return Array.from(collections.values());
+  } catch (error) {
+    console.error("Error fetching NFT collections:", error);
+    throw error;
+  }
+}
+
 export async function getNFTsForOwner(
   ownerAddress: string,
   chainId: number,
@@ -106,7 +137,7 @@ export async function getNFTsForOwner(
       } else if (nft.rawMetadata?.image) {
         imageUrl = nft.rawMetadata.image;
       }
-      console.log(nft);
+
       const mappedNFT = {
         tokenId: nft.id.tokenId,
         name: nft.name || nft.title || `NFT #${nft.tokenId}`,
@@ -129,6 +160,7 @@ export async function getNFTsForOwner(
 
 const alchemyService = {
   getNFTsForOwner,
+  getNFTCollections,
 };
 
 export default alchemyService;
