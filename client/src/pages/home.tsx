@@ -13,7 +13,6 @@ import { useEffect, useState, useCallback } from "react";
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
   const { showNFTGrid } = useNFTs();
-  const [currentView, setCurrentView] = useState<"collection" | "nft">("collection");
   const isAuthenticated = !!localStorage.getItem("auth_token");
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
@@ -23,12 +22,11 @@ export default function Home() {
   // Monitor showNFTGrid changes
   useEffect(() => {
     console.log("showNFTGrid changed in Home:", showNFTGrid);
-    setCurrentView(showNFTGrid ? "nft" : "collection");
   }, [showNFTGrid]);
 
   const renderNFTContent = useCallback(() => {
-    console.log("Rendering content. Current view:", currentView, "showNFTGrid:", showNFTGrid);
-    if (currentView === "nft") {
+    console.log("Rendering content, showNFTGrid:", showNFTGrid);
+    if (showNFTGrid) {
       return (
         <>
           <NFTGrid />
@@ -37,7 +35,7 @@ export default function Home() {
       );
     }
     return <CollectionGrid />;
-  }, [currentView, showNFTGrid]); // Add dependencies that should trigger re-render
+  }, [showNFTGrid]); // Only depend on showNFTGrid
 
   return (
     <div className="min-h-screen bg-background text-foreground">
