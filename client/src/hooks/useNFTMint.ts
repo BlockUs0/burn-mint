@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { mintNFT } from "@/services/auth";
+import { mintNFT } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 export function useNFTMint() {
