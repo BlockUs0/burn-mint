@@ -1,6 +1,7 @@
 import { WalletButton } from "@/components/WalletConnection/WalletButton";
 import { NFTLayout } from "@/components/NFTDisplay/NFTLayout";
 import { BurnHistory } from "@/components/BurnHistory/BurnHistory";
+import { MintInterface } from "@/components/MintInterface/MintInterface";
 import { useWallet } from "@/hooks/useWallet";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,13 +47,18 @@ export default function Home() {
             </div>
           ) : walletStatus === "connected" && isAuthenticated ? (
             <Tabs defaultValue="nfts" className="space-y-6">
-              <TabsList className="grid w-[400px] grid-cols-2">
+              <TabsList className="grid w-[400px] grid-cols-3">
                 <TabsTrigger value="nfts">NFTs</TabsTrigger>
+                <TabsTrigger value="mint">Mint</TabsTrigger>
                 <TabsTrigger value="history">Burn History</TabsTrigger>
               </TabsList>
 
               <TabsContent value="nfts" className="space-y-6" forceMount>
                 <NFTLayout />
+              </TabsContent>
+
+              <TabsContent value="mint">
+                <MintInterface />
               </TabsContent>
 
               <TabsContent value="history">
