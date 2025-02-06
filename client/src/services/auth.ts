@@ -86,3 +86,42 @@ export async function web3Login({
 
   return data;
 }
+
+export type MintResponse = {
+  success: boolean;
+  transactionHash?: string;
+};
+
+export async function mintNFT(
+  collectionId: string,
+  tokenId: string,
+  quantity: number = 1
+): Promise<MintResponse> {
+  console.log("Minting NFT with params:", { collectionId, tokenId, quantity });
+
+  const URL = `/v1/players/wallets/collections/${collectionId}/nfts/${tokenId}/mint`;
+  const accessToken = localStorage.getItem('blockus_access_token');
+
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
+
+  const response = await fetch(`${API_URL}${URL}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ quantity }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Mint failed:", errorText);
+    throw new Error(`Mint failed: ${errorText}`);
+  }
+
+  const data = await response.json();
+  console.log("Mint response:", data);
+  return data;
+}
