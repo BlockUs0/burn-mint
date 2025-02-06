@@ -11,7 +11,7 @@ export default function Home() {
   const isAuthenticated = !!localStorage.getItem("auth_token");
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
-    limit: 10,
+    limit: 20,
   });
 
   return (

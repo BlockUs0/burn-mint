@@ -14,7 +14,7 @@ interface BurnRegistrationData {
   chain: string;
   walletAddress: string;
   burnProof: BurnProof;
-  amount: number;
+  collectionContractAddress: string;
 }
 
 export async function registerBurn(data: {
@@ -31,7 +31,7 @@ export async function registerBurn(data: {
       type: "evm",
       txHash: data.txHash,
     },
-    amount: data.tokenIds.length, // Amount is now the number of tokens being burned
+    collectionContractAddress: data.tokenAddress
   };
 
   const accessToken = localStorage.getItem("blockus_access_token");
@@ -75,6 +75,8 @@ export async function getBurns(
     url.searchParams.append("walletAddress", query.walletAddress);
   }
 
+  url.searchParams.append("limit", "20");
+
   const response = await fetch(url.toString(), {
     method: "GET",
     headers,
@@ -84,6 +86,5 @@ export async function getBurns(
   if (!response.ok) {
     throw new Error("Failed to fetch burns");
   }
-
   return response.json();
 }

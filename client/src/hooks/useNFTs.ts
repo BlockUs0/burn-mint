@@ -5,6 +5,7 @@ import alchemyService from "@/services/alchemy";
 import nftService from "@/services/web3";
 import { useToast } from "@/hooks/use-toast";
 import { useNetwork } from "@/lib/web3Provider";
+import { Address } from "viem";
 
 export function useNFTs() {
   const { address, status } = useWallet();
@@ -52,16 +53,13 @@ export function useNFTs() {
     if (!address || !selectedCollection || !chain?.id) return;
 
     try {
-      console.log("Checking approval for:", selectedCollection);
       const isApproved = await nftService.isApprovedForAll(
-        address,
+        address as Address,
         selectedCollection as `0x${string}`,
       );
-      console.log("Approval status:", isApproved);
       setIsApprovedForAll(isApproved);
       return isApproved;
     } catch (error) {
-      console.error("Error checking approval:", error);
       setIsApprovedForAll(false);
       toast({
         variant: "destructive",

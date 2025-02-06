@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
-import { hexToNumber } from "viem"
+import { Address, hexToNumber } from "viem"
 
 interface BurnProof {
   type: string
@@ -18,10 +18,10 @@ interface BurnRecord {
   tokenId: string
   chain: string
   walletAddress: string
-  amount: number
   timestamp: number
   burnProof: BurnProof
   status: string
+  collectionContractAddress: Address
 }
 
 interface BurnHistoryProps {
@@ -36,7 +36,7 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
           <TableRow>
             <TableHead>Token ID</TableHead>
             <TableHead>Chain</TableHead>
-            <TableHead>Amount</TableHead>
+            <TableHead>Token Address</TableHead>
             <TableHead>Time</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Tx Hash</TableHead>
@@ -56,7 +56,7 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
                 })()}
               </TableCell>
               <TableCell className="capitalize">{burn.chain}</TableCell>
-              <TableCell>{burn.amount}</TableCell>
+              <TableCell>{burn.collectionContractAddress}</TableCell>
               <TableCell>
                 {format(new Date(burn.timestamp), "MMM d, yyyy HH:mm")}
               </TableCell>

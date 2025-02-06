@@ -87,7 +87,6 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     });
 
     const data = await response.json();
-    console.log(data); // Log raw response
 
     const nfts = data.ownedNfts.map((nft: any) => {
       let imageUrl = "";
@@ -136,7 +135,7 @@ export async function getNFTsForOwner(
 
     const baseUrl = getAlchemyBaseUrl(chainId);
     const nfts = await getAllNFTPages(baseUrl, ownerAddress);
-    console.log("Total NFTs fetched for owner:", nfts.length);
+    
     return nfts;
   } catch (error) {
     console.error("Error fetching NFTs from Alchemy:", error);
@@ -150,16 +149,6 @@ export async function getNFTCollections(
 ): Promise<NFTCollection[]> {
   try {
     const nfts = await getNFTsForOwner(ownerAddress, chainId);
-    console.log("Total NFTs fetched:", nfts.length);
-    console.log(
-      "All NFTs before grouping:",
-      nfts.map((nft) => ({
-        tokenId: nft.tokenId,
-        name: nft.name,
-        tokenAddress: nft.tokenAddress,
-      })),
-    );
-
     const collections = nfts.reduce((acc, nft) => {
       console.log("Processing NFT for collection:", {
         tokenId: nft.tokenId,
