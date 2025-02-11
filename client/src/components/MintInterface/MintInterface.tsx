@@ -4,9 +4,9 @@ import { useNFTMint } from "@/hooks/useNFTMint";
 import { useToast } from "@/hooks/use-toast";
 
 // Hardcoded values for now
-const COLLECTION_ID = "pNGsZiV5MZlIVMBHBw9LlVPPuhlJ";
+const COLLECTION_ID = "2DBt6gXTtwNMBkllG3qoKf8xwBKx";
 const TOKEN_ID = "1";
-const TOKEN_ADDRESS = "0x1234567890123456789012345678901234567890";
+const TOKEN_ADDRESS = "0xF86a582D544cbB50B2EFf695F20862E030d916C6";
 
 export function MintInterface() {
   const { mint, isLoading } = useNFTMint();
