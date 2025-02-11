@@ -2,7 +2,6 @@ import { BurnRecord, BurnQueryDto } from "@/types";
 import { type Address } from "viem";
 
 const API_URL = "http://127.0.0.1:5001/blockus1/us-central1/api";
-const PROJECT_ID = "YiodrSuXgHaE3623ilMGacKoehVq";
 
 interface BurnProof {
   type: "evm";
@@ -25,22 +24,22 @@ export type MintResponse = {
 export async function mintNFT(
   collectionId: string,
   tokenId: string,
-  quantity: number = 1
+  quantity: number = 1,
 ): Promise<MintResponse> {
   console.log("Minting NFT with params:", { collectionId, tokenId, quantity });
 
   const URL = `/v1/players/wallets/collections/${collectionId}/nfts/${tokenId}/mint`;
-  const accessToken = localStorage.getItem('blockus_access_token');
+  const accessToken = localStorage.getItem("blockus_access_token");
 
   if (!accessToken) {
-    throw new Error('No access token found');
+    throw new Error("No access token found");
   }
 
   const response = await fetch(`${API_URL}${URL}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ quantity }),
   });
@@ -70,7 +69,7 @@ export async function registerBurn(data: {
       type: "evm",
       txHash: data.txHash,
     },
-    collectionContractAddress: data.tokenAddress
+    collectionContractAddress: data.tokenAddress,
   };
 
   const accessToken = localStorage.getItem("blockus_access_token");
