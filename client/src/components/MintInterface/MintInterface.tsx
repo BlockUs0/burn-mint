@@ -6,6 +6,7 @@ import { useBurns } from "@/hooks/useBurns";
 import { useAccount } from "wagmi";
 import { Address } from "viem";
 import { useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 // Hardcoded values for now
 const COLLECTION_ID = "2DBt6gXTtwNMBkllG3qoKf8xwBKx";
@@ -35,9 +36,7 @@ export function MintInterface() {
       // Show success toast with tx hash
       toast({
         title: "NFT Minted Successfully",
-        description: `Transaction Hash: ${response.transactionHash?.slice(0, 10)}...`,
-        title: "NFT Minted Successfully",
-        description: "Your new NFT has been minted!",
+        description: `Transaction Hash: ${response.mintTxs[0]?.slice(0, 10)}...`,
       });
     } catch (error) {
       console.error("Mint error:", error);
@@ -77,7 +76,14 @@ export function MintInterface() {
           disabled={isLoading || mintableCount === 0}
           className="w-full"
         >
-          {isLoading ? "Minting..." : "Mint NFT"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Minting...
+            </>
+          ) : (
+            "Mint NFT"
+          )}
         </Button>
       </CardContent>
     </Card>
