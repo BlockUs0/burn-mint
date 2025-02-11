@@ -5,8 +5,8 @@ import {
   isChainSupported,
 } from "@/config/networks";
 
-const ALCHEMY_API_KEY =
-  import.meta.env.VITE_ALCHEMY_API_KEY || "Eb5YzZMR9-i55viNBnAvUpwN11ko7YR3";
+import { API_CONFIG } from "@/config/api";
+const ALCHEMY_API_KEY = API_CONFIG.ALCHEMY_KEY;
 
 function getAlchemyBaseUrl(chainId: number): string {
   if (!isChainSupported(chainId)) {
