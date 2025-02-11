@@ -1,8 +1,6 @@
 import { Address, Hash } from "viem";
 
-// const API_URL = "https://api-staging.blockus.net";
-const API_URL = "http://127.0.0.1:5001/blockus1/us-central1/api";
-const PROJECT_ID = "2IzYY1TZCqE6sDT6qHsMTtqszUAL";
+import { API_CONFIG } from "@/config/api";
 
 export type ChallengeResponse = {
   code: string;

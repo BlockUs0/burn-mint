@@ -1,7 +1,8 @@
 import { BurnRecord, BurnQueryDto } from "@/types";
 import { type Address } from "viem";
 
-const API_URL = "http://127.0.0.1:5001/blockus1/us-central1/api";
+import { API_CONFIG } from "@/config/api";
+const API_URL = API_CONFIG.URL;
 
 interface BurnProof {
   type: "evm";
