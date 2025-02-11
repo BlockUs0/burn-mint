@@ -7,13 +7,6 @@ import { useEffect } from "react";
 export function NFTLayout() {
   const { showNFTGrid, selectedCollection } = useNFTs();
 
-  useEffect(() => {
-    console.log("NFTLayout state changed:", {
-      showNFTGrid,
-      selectedCollection,
-    });
-  }, [showNFTGrid, selectedCollection]);
-
   return (
     <div className="w-full">
       {showNFTGrid ? (
