@@ -26,12 +26,6 @@ export function useNFTMint() {
         description: error instanceof Error ? error.message : "Unknown error occurred",
       });
     },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "NFT minted successfully",
-      });
-    },
   });
 
   return {

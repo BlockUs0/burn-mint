@@ -23,7 +23,7 @@ export function MintInterface() {
 
   const handleMint = async () => {
     try {
-      await mint({ 
+      const response = await mint({ 
         collectionId: COLLECTION_ID, 
         tokenId: TOKEN_ID,
         quantity: 1 
@@ -32,8 +32,10 @@ export function MintInterface() {
       // Invalidate and refetch burns query
       await queryClient.invalidateQueries({ queryKey: ["burns"] });
       
-      // Show success toast
+      // Show success toast with tx hash
       toast({
+        title: "NFT Minted Successfully",
+        description: `Transaction Hash: ${response.transactionHash?.slice(0, 10)}...`,
         title: "NFT Minted Successfully",
         description: "Your new NFT has been minted!",
       });
