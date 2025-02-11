@@ -1,3 +1,4 @@
+
 import { useMutation } from "@tanstack/react-query";
 import { mintNFT } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
@@ -6,8 +7,8 @@ export function useNFTMint() {
   const { toast } = useToast();
 
   const {
-    mutate: mint,
-    isLoading,
+    mutateAsync: mint,
+    isPending: isLoading,
     error,
   } = useMutation({
     mutationFn: ({

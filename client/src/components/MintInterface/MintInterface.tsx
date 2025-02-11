@@ -76,14 +76,16 @@ export function MintInterface() {
           disabled={isLoading || mintableCount === 0}
           className="w-full"
         >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>Minting...</span>
-            </div>
-          ) : (
-            "Mint NFT"
-          )}
+          <div className="flex items-center justify-center w-full">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Minting...</span>
+              </>
+            ) : (
+              "Mint NFT"
+            )}
+          </div>
         </Button>
       </CardContent>
     </Card>
