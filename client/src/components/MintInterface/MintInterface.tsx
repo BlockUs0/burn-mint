@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useBurns } from "@/hooks/useBurns";
 import { useAccount } from "wagmi";
 import { Address } from "viem";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Hardcoded values for now
 const COLLECTION_ID = "2DBt6gXTtwNMBkllG3qoKf8xwBKx";
@@ -15,7 +16,8 @@ export function MintInterface() {
   const { mint, isLoading } = useNFTMint();
   const { toast } = useToast();
   const { address } = useAccount();
-  const { burns, refetch } = useBurns({ walletAddress: address as Address });
+  const queryClient = useQueryClient();
+  const { burns } = useBurns({ walletAddress: address as Address });
   
   const mintableCount = burns?.items?.filter(burn => !burn.used).length || 0;
 
@@ -27,8 +29,8 @@ export function MintInterface() {
         quantity: 1 
       });
       
-      // Refetch burns to update available mints
-      await refetch();
+      // Invalidate and refetch burns query
+      await queryClient.invalidateQueries({ queryKey: ["burns"] });
       
       // Show success toast
       toast({
