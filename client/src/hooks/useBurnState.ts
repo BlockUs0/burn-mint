@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BurnState } from "@/types";
 import nftService from "@/services/web3";
 import { registerBurn } from "@/services/api";
@@ -10,6 +10,7 @@ import { getPublicClient } from "@/services/web3";
 import { useBurns } from "./useBurns";
 
 export function useBurnState() {
+  const queryClient = useQueryClient();
   const [state, setState] = useState<BurnState>({
     status: "idle",
     burnCount: 0,
@@ -56,7 +57,8 @@ export function useBurnState() {
           walletAddress 
         });
 
-        // Refresh burn history
+        // Refresh burn history and invalidate all burn-related queries
+        queryClient.invalidateQueries({ queryKey: ["burns"] });
         await refetchBurns();
 
         setState((prev) => ({
