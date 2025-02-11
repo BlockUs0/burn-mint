@@ -77,10 +77,10 @@ export function MintInterface() {
           className="w-full"
         >
           {isLoading ? (
-            <>
+            <div className="flex items-center justify-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Minting...
-            </>
+              <span>Minting...</span>
+            </div>
           ) : (
             "Mint NFT"
           )}
