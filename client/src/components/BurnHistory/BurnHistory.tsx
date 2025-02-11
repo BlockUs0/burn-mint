@@ -21,6 +21,7 @@ interface BurnRecord {
   timestamp: number
   burnProof: BurnProof
   status: string
+  used: boolean
   collectionContractAddress: Address
 }
 
@@ -39,6 +40,7 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
             <TableHead>Token Address</TableHead>
             <TableHead>Time</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Used</TableHead>
             <TableHead>Tx Hash</TableHead>
           </TableRow>
         </TableHeader>
@@ -61,6 +63,7 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
                 {format(new Date(burn.timestamp), "MMM d, yyyy HH:mm")}
               </TableCell>
               <TableCell className="capitalize">{burn.status}</TableCell>
+              <TableCell>{burn.used ? "Yes" : "No"}</TableCell>
               <TableCell className="font-mono">
                 <a 
                   href={`https://${burn.chain === 'ethereum' ? '' : burn.chain + '.'}etherscan.io/tx/${burn.burnProof.txHash}`}
