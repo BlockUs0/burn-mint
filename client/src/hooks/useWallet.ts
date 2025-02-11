@@ -76,7 +76,7 @@ export function useWallet() {
       const { accessToken } = await web3Login({
         address,
         signature,
-        chain: chain.name.toLowerCase(),
+        chain: "ethereum", // Always use ethereum for web3Login
       });
 
       // Store the access token first
@@ -84,7 +84,7 @@ export function useWallet() {
       // Also store auth_token for backward compatibility
       localStorage.setItem("auth_token", accessToken);
 
-      // Get user ID
+      // Get user ID using the current chain
       await getWalletAddress(chain.name.toLowerCase());
 
       toast({
