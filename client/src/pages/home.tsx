@@ -53,7 +53,7 @@ export default function Home() {
                 <TabsTrigger value="history">Burn History</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="nfts" className="space-y-6" forceMount>
+              <TabsContent value="nfts" className="space-y-6">
                 <NFTLayout />
               </TabsContent>
 
