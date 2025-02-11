@@ -63,17 +63,14 @@ export function useWallet() {
 
     try {
       setIsAuthenticating(true);
-      console.log("Starting authentication for address:", address);
 
       // Get challenge
       const challenge = await getWeb3Challenge(address);
-      console.log("Received challenge:", challenge);
 
       // Sign challenge
       const signature = await signMessageAsync({
         message: JSON.stringify(challenge),
       });
-      console.log("Message signed:", { signature });
 
       // Login with signature
       const { accessToken } = await web3Login({
@@ -81,6 +78,11 @@ export function useWallet() {
         signature,
         chain: chain.name.toLowerCase(),
       });
+
+      // Store the access token first
+      localStorage.setItem("blockus_access_token", accessToken);
+      // Also store auth_token for backward compatibility
+      localStorage.setItem("auth_token", accessToken);
 
       // Get user ID
       await getWalletAddress(chain.name.toLowerCase());

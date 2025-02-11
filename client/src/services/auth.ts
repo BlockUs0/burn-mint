@@ -50,10 +50,12 @@ export async function getWeb3Challenge(
   return data;
 }
 
-export async function getWalletAddress(chain: string): Promise<WalletAddressResponse> {
-  const accessToken = localStorage.getItem('blockus_access_token');
+export async function getWalletAddress(
+  chain: string,
+): Promise<WalletAddressResponse> {
+  const accessToken = localStorage.getItem("blockus_access_token");
   if (!accessToken) {
-    throw new Error('No access token found');
+    throw new Error("No access token found");
   }
 
   console.log("Fetching wallet address for chain:", chain);
@@ -78,7 +80,7 @@ export async function getWalletAddress(chain: string): Promise<WalletAddressResp
 
   // Store userId in localStorage for later use
   if (data.userId) {
-    localStorage.setItem('blockus_user_id', data.userId);
+    localStorage.setItem("blockus_user_id", data.userId);
   }
 
   return data;
@@ -120,10 +122,10 @@ export async function web3Login({
 
   // Store the access token in localStorage
   if (data.accessToken) {
-    localStorage.setItem('blockus_access_token', data.accessToken);
+    localStorage.setItem("blockus_access_token", data.accessToken);
   } else {
-    console.error('No access token received in login response');
-    throw new Error('No access token received');
+    console.error("No access token received in login response");
+    throw new Error("No access token received");
   }
 
   return data;
