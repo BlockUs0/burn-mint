@@ -15,7 +15,7 @@ export function MintInterface() {
   const { mint, isLoading } = useNFTMint();
   const { toast } = useToast();
   const { address } = useAccount();
-  const { burns } = useBurns({ walletAddress: address as Address });
+  const { burns, refetch } = useBurns({ walletAddress: address as Address });
   
   const mintableCount = burns?.items?.filter(burn => !burn.used).length || 0;
 
@@ -25,6 +25,15 @@ export function MintInterface() {
         collectionId: COLLECTION_ID, 
         tokenId: TOKEN_ID,
         quantity: 1 
+      });
+      
+      // Refetch burns to update available mints
+      await refetch();
+      
+      // Show success toast
+      toast({
+        title: "NFT Minted Successfully",
+        description: "Your new NFT has been minted!",
       });
     } catch (error) {
       console.error("Mint error:", error);
