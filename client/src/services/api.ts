@@ -63,7 +63,7 @@ export async function registerBurn(data: {
 }): Promise<BurnRecord> {
   const burnData: BurnRegistrationData = {
     tokenIds: data.tokenIds,
-    chain: "polygon", // Currently hardcoded to polygon
+    chain: "polygon",
     walletAddress: data.walletAddress,
     burnProof: {
       type: "evm",
