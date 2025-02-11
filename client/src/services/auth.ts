@@ -14,6 +14,14 @@ export type LoginResponse = {
   accessToken: string;
 };
 
+export type WalletAddressResponse = {
+  address: string;
+  chain: string;
+  nonCustodial: boolean;
+  balance: any[];
+  userId: string;
+};
+
 export async function getWeb3Challenge(
   address: Address,
 ): Promise<ChallengeResponse> {
@@ -39,6 +47,40 @@ export async function getWeb3Challenge(
 
   const data = await response.json();
   console.log("Challenge response:", data);
+  return data;
+}
+
+export async function getWalletAddress(chain: string): Promise<WalletAddressResponse> {
+  const accessToken = localStorage.getItem('blockus_access_token');
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
+
+  console.log("Fetching wallet address for chain:", chain);
+
+  const URL = `/v1/players/wallets/getAddress?chain=${chain}`;
+  const response = await fetch(`${API_URL}${URL}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-ACCESS-TOKEN": accessToken,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("Get wallet address failed:", error);
+    throw new Error(`Failed to get wallet address: ${error}`);
+  }
+
+  const data = await response.json();
+  console.log("Wallet address response:", data);
+
+  // Store userId in localStorage for later use
+  if (data.userId) {
+    localStorage.setItem('blockus_user_id', data.userId);
+  }
+
   return data;
 }
 

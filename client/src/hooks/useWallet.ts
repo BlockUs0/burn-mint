@@ -3,7 +3,8 @@ import { WalletState } from "@/types";
 import { useToast } from "./use-toast";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { getWeb3Challenge, web3Login } from "@/services/auth";
+import { getWeb3Challenge, web3Login, getWalletAddress } from "@/services/auth";
+import { useNetwork } from "@/lib/web3Provider";
 
 export function useWallet() {
   const { toast } = useToast();
@@ -12,6 +13,7 @@ export function useWallet() {
   const { disconnectAsync } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const { chain } = useNetwork();
 
   const connect = useCallback(async () => {
     if (!window.ethereum) {
@@ -50,6 +52,15 @@ export function useWallet() {
       return;
     }
 
+    if (!chain) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "No chain selected",
+      });
+      return;
+    }
+
     try {
       setIsAuthenticating(true);
       console.log("Starting authentication for address:", address);
@@ -68,11 +79,11 @@ export function useWallet() {
       const { accessToken } = await web3Login({
         address,
         signature,
-        chain: "ethereum",
+        chain: chain.name.toLowerCase(),
       });
 
-      // Store token
-      localStorage.setItem("auth_token", accessToken);
+      // Get user ID
+      await getWalletAddress(chain.name.toLowerCase());
 
       toast({
         title: "Authentication Successful",
@@ -94,16 +105,19 @@ export function useWallet() {
 
       // Clean up any partial authentication state
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("blockus_access_token");
+      localStorage.removeItem("blockus_user_id");
     } finally {
       setIsAuthenticating(false);
     }
-  }, [address, signMessageAsync, toast]);
+  }, [address, signMessageAsync, toast, chain]);
 
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
       localStorage.removeItem("auth_token");
-      localStorage.removeItem("blockus_access_token"); 
+      localStorage.removeItem("blockus_access_token");
+      localStorage.removeItem("blockus_user_id");
       toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected",
