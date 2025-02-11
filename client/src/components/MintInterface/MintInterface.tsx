@@ -2,6 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNFTMint } from "@/hooks/useNFTMint";
 import { useToast } from "@/hooks/use-toast";
+import { useBurns } from "@/hooks/useBurns";
+import { useAccount } from "wagmi";
+import { Address } from "viem";
 
 // Hardcoded values for now
 const COLLECTION_ID = "2DBt6gXTtwNMBkllG3qoKf8xwBKx";
@@ -11,6 +14,10 @@ const TOKEN_ADDRESS = "0xF86a582D544cbB50B2EFf695F20862E030d916C6";
 export function MintInterface() {
   const { mint, isLoading } = useNFTMint();
   const { toast } = useToast();
+  const { address } = useAccount();
+  const { burns } = useBurns({ walletAddress: address as Address });
+  
+  const mintableCount = burns?.items?.filter(burn => !burn.used).length || 0;
 
   const handleMint = async () => {
     try {
@@ -38,6 +45,10 @@ export function MintInterface() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="mb-4">
+          <span className="text-sm font-medium">Available Mints: </span>
+          <span className="text-lg font-bold text-orange-500">{mintableCount}</span>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">Token ID</label>
@@ -50,7 +61,7 @@ export function MintInterface() {
         </div>
         <Button 
           onClick={handleMint} 
-          disabled={isLoading}
+          disabled={isLoading || mintableCount === 0}
           className="w-full"
         >
           {isLoading ? "Minting..." : "Mint NFT"}
