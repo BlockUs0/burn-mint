@@ -21,16 +21,16 @@ export type WalletAddressResponse = {
 };
 
 export async function getWeb3Challenge(
-  address: Address,
+  address: Address
 ): Promise<ChallengeResponse> {
   console.log("Requesting challenge for address:", address);
 
   const URL = "/v1/auth/challenge?type=web3";
-  const response = await fetch(`${API_URL}${URL}`, {
+  const response = await fetch(`${API_CONFIG.URL}${URL}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-PROJECT-ID": PROJECT_ID,
+      "X-PROJECT-ID": API_CONFIG.PROJECT_ID,
     },
     body: JSON.stringify({
       address,
@@ -49,7 +49,7 @@ export async function getWeb3Challenge(
 }
 
 export async function getWalletAddress(
-  chain: string,
+  chain: string
 ): Promise<WalletAddressResponse> {
   const accessToken = localStorage.getItem("blockus_access_token");
   if (!accessToken) {
@@ -59,7 +59,7 @@ export async function getWalletAddress(
   console.log("Fetching wallet address for chain:", chain);
 
   const URL = `/v1/players/wallets/getAddress?chain=${chain}`;
-  const response = await fetch(`${API_URL}${URL}`, {
+  const response = await fetch(`${API_CONFIG.URL}${URL}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -100,11 +100,11 @@ export async function web3Login({
   });
 
   const URL = "/v1/players/login?type=web3";
-  const response = await fetch(`${API_URL}${URL}`, {
+  const response = await fetch(`${API_CONFIG.URL}${URL}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-PROJECT-ID": PROJECT_ID,
+      "X-PROJECT-ID": API_CONFIG.PROJECT_ID,
     },
     body: JSON.stringify({ address, signature, chain }),
   });
