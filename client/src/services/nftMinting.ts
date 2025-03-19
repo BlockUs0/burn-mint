@@ -1,6 +1,5 @@
-import { createPublicClient, http, Address, createWalletClient, custom, Hash } from 'viem';
+import { createPublicClient, createWalletClient, custom, http, PublicClient, WalletClient, Address, Hash, Chain } from 'viem';
 import { sepolia, mainnet, polygon } from 'viem/chains';
-import type { Chain } from 'viem';
 
 // Contract addresses for different networks
 export const NFT_CONTRACT_ADDRESSES: Record<number, Address> = {
@@ -97,7 +96,7 @@ export const createNFTContractReader = (chain: Chain) => {
 export const mintNFT = async ({
   chain,
   tokenId,
-  amount = 1n,
+  amount = BigInt(1),
   signature = '0x' // Default empty signature for free minting
 }: {
   chain: Chain;

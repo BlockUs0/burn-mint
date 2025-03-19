@@ -27,7 +27,7 @@ export function TokenConfigTable() {
       const hash = await mintNFT({
         chain: polygon, // For now, we're using Polygon
         tokenId,
-        amount: 1n,
+        amount: BigInt(1),
       });
 
       toast({
