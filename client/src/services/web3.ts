@@ -9,7 +9,7 @@ import {
   Hash,
   Chain,
 } from "viem";
-import { mainnet, polygon } from "viem/chains";
+import { mainnet, polygon, sepolia } from "viem/chains";
 import { hasBatchSupport, getBatchContractAddress } from "@/config/networks";
 
 declare global {
@@ -25,6 +25,7 @@ export const { NFT_ADDRESS: NFT_CONTRACT_ADDRESS, ZERO_ADDRESS, BURN_ADDRESS } =
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
   POLYGON: polygon,
+  SEPOLIA: sepolia,
 } as const;
 
 // Network specific configurations
@@ -44,6 +45,14 @@ export const NETWORK_CONFIG = {
       decimals: 18,
     },
     blockExplorer: 'https://polygonscan.com',
+  },
+  [sepolia.id]: {
+    name: 'Sepolia',
+    nativeCurrency: {
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorer: 'https://sepolia.etherscan.io',
   },
 } as const;
 
@@ -72,7 +81,7 @@ export async function getCurrentChain(): Promise<Chain> {
 
   if (!chain) {
     throw new Error(
-      "Please connect to a supported network (chainId: 1 or 137)",
+      "Please connect to a supported network (Ethereum, Polygon, or Sepolia)",
     );
   }
 
