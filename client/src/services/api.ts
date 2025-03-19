@@ -35,7 +35,6 @@ export async function mintNFT(
   if (!accessToken) {
     throw new Error("No access token found");
   }
-
   const response = await fetch(`${API_URL}${URL}`, {
     method: "POST",
     headers: {
