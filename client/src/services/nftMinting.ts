@@ -1,11 +1,12 @@
 import { createPublicClient, http, Address, createWalletClient } from 'viem';
-import { sepolia, mainnet } from 'viem/chains';
+import { sepolia, mainnet, polygon } from 'viem/chains';
 import type { Chain } from 'viem';
 
 // Contract addresses for different networks
 export const NFT_CONTRACT_ADDRESSES: Record<number, Address> = {
   [sepolia.id]: '0x...' as Address, // TODO: Add Sepolia contract address
   [mainnet.id]: '0x...' as Address, // TODO: Add Mainnet contract address
+  [polygon.id]: '0x99D5d48d99A1fa11Fe16F9bD51d4eBA84650ce1d' as Address,
 };
 
 // ABI for the NFT contract
@@ -45,7 +46,6 @@ export const NFT_CONTRACT_ABI = [
   }
 ] as const;
 
-// Types based on contract structs
 export interface TokenConfig {
   name: string;
   maxSupply: bigint;
@@ -55,7 +55,6 @@ export interface TokenConfig {
   soulbound: boolean;
 }
 
-// Create contract instance for reading
 export const createNFTContractReader = (chain: Chain) => {
   const contractAddress = NFT_CONTRACT_ADDRESSES[chain.id];
   if (!contractAddress) {
