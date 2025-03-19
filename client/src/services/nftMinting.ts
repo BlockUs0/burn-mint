@@ -1,4 +1,4 @@
-import { createPublicClient, http, Address, createWalletClient } from 'viem';
+import { createPublicClient, http, Address, createWalletClient, custom, Hash } from 'viem';
 import { sepolia, mainnet, polygon } from 'viem/chains';
 import type { Chain } from 'viem';
 
@@ -82,7 +82,6 @@ export const createNFTContractReader = (chain: Chain) => {
         args: [tokenId]
       }) as readonly [string, bigint, bigint, boolean, boolean, boolean];
 
-      // Properly map the tuple to our TokenConfig interface
       return {
         name: result[0],
         maxSupply: result[1],
@@ -93,4 +92,38 @@ export const createNFTContractReader = (chain: Chain) => {
       };
     }
   };
+};
+
+export const mintNFT = async ({
+  chain,
+  tokenId,
+  amount = 1n,
+  signature = '0x' // Default empty signature for free minting
+}: {
+  chain: Chain;
+  tokenId: bigint;
+  amount?: bigint;
+  signature?: `0x${string}`;
+}): Promise<Hash> => {
+  if (!window.ethereum) throw new Error('No wallet detected');
+
+  const contractAddress = NFT_CONTRACT_ADDRESSES[chain.id];
+  if (!contractAddress) {
+    throw new Error(`No contract address found for chain ${chain.id}`);
+  }
+
+  const client = createWalletClient({
+    chain,
+    transport: custom(window.ethereum)
+  });
+
+  const [account] = await client.requestAddresses();
+
+  return client.writeContract({
+    address: contractAddress,
+    abi: NFT_CONTRACT_ABI,
+    functionName: 'mint',
+    args: [account, tokenId, amount, signature],
+    account,
+  });
 };
