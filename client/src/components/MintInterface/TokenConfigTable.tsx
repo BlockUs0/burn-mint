@@ -12,9 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useTokenConfigs } from "@/hooks/useTokenConfigs";
 import { mintNFT } from "@/services/nftMinting";
 import { useToast } from "@/hooks/use-toast";
-import { polygon } from "viem/chains";
 import { useState } from "react";
-import { getPublicClient } from "@/services/web3";
+import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl } from "@/services/web3";
 
 export function TokenConfigTable() {
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
@@ -25,15 +24,30 @@ export function TokenConfigTable() {
     try {
       setMintingTokenId(tokenId.toString());
 
+      const chain = await getCurrentChain();
       const hash = await mintNFT({
-        chain: polygon, // For now, we're using Polygon
+        chain,
         tokenId,
         amount: BigInt(1),
       });
 
+      const explorerUrl = getExplorerTxUrl(chain.id, hash);
+
       toast({
         title: "NFT Minting Started",
-        description: `Transaction hash: ${hash.slice(0, 10)}...`,
+        description: (
+          <span>
+            Transaction hash:{" "}
+            <a 
+              href={explorerUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-700"
+            >
+              {hash.slice(0, 10)}...
+            </a>
+          </span>
+        ),
       });
 
       // Wait for transaction confirmation using Viem
@@ -84,7 +98,7 @@ export function TokenConfigTable() {
                 <TableHead>ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Max Supply</TableHead>
-                <TableHead>Price (ETH)</TableHead>
+                <TableHead>Price</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Action</TableHead>
@@ -103,7 +117,7 @@ export function TokenConfigTable() {
                       : config.maxSupply.toString()}
                   </TableCell>
                   <TableCell>
-                    {(Number(config.price) / 1e18).toFixed(4)}
+                    {formatNativeCurrency(config.chainId, config.price)}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${

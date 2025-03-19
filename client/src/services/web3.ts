@@ -27,8 +27,42 @@ export const SUPPORTED_CHAINS = {
   POLYGON: polygon,
 } as const;
 
+// Network specific configurations
+export const NETWORK_CONFIG = {
+  [mainnet.id]: {
+    name: 'Ethereum',
+    nativeCurrency: {
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorer: 'https://etherscan.io',
+  },
+  [polygon.id]: {
+    name: 'Polygon',
+    nativeCurrency: {
+      symbol: 'MATIC',
+      decimals: 18,
+    },
+    blockExplorer: 'https://polygonscan.com',
+  },
+} as const;
+
+// Function to get block explorer URL for a transaction
+export function getExplorerTxUrl(chainId: number, txHash: string): string {
+  const config = NETWORK_CONFIG[chainId as keyof typeof NETWORK_CONFIG];
+  if (!config) throw new Error(`Unsupported chain ID: ${chainId}`);
+  return `${config.blockExplorer}/tx/${txHash}`;
+}
+
+// Function to format native currency amount
+export function formatNativeCurrency(chainId: number, amount: bigint): string {
+  const config = NETWORK_CONFIG[chainId as keyof typeof NETWORK_CONFIG];
+  if (!config) throw new Error(`Unsupported chain ID: ${chainId}`);
+  return `${(Number(amount) / 10 ** config.nativeCurrency.decimals).toFixed(4)} ${config.nativeCurrency.symbol}`;
+}
+
 // Function to get the current chain from ethereum provider
-async function getCurrentChain(): Promise<Chain> {
+export async function getCurrentChain(): Promise<Chain> {
   if (!window.ethereum) throw new Error("No wallet detected");
 
   const chainId = parseInt(window.ethereum.chainId);
