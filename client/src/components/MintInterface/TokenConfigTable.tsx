@@ -12,19 +12,25 @@ import { Button } from "@/components/ui/button";
 import { useTokenConfigs } from "@/hooks/useTokenConfigs";
 import { mintNFT } from "@/services/nftMinting";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl } from "@/services/web3";
+import { useAccount, useChainId } from "wagmi";
 
 export function TokenConfigTable() {
+  const chainId = useChainId();
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
   const { toast } = useToast();
   const [mintingTokenId, setMintingTokenId] = useState<string | null>(null);
   const [currentChain, setCurrentChain] = useState<number | null>(null);
 
-  // Get current chain when component mounts
-  useState(() => {
-    getCurrentChain().then(chain => setCurrentChain(chain.id));
-  }, []);
+  // Update current chain when network changes
+  useEffect(() => {
+    if (chainId) {
+      setCurrentChain(chainId);
+    } else {
+      getCurrentChain().then(chain => setCurrentChain(chain.id));
+    }
+  }, [chainId]);
 
   const handleMint = async (tokenId: bigint) => {
     try {

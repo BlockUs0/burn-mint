@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { createNFTContractReader } from "@/services/nftMinting";
-import { polygon } from "viem/chains";
 import type { TokenConfig } from "@/services/nftMinting";
 import { getCurrentChain } from "@/services/web3";
+import { useAccount, useChainId } from "wagmi";
 
 export function useTokenConfigs() {
+  const chainId = useChainId();
+
   return useQuery({
-    queryKey: ["tokenConfigs"],
+    queryKey: ["tokenConfigs", chainId],
     queryFn: async () => {
       const chain = await getCurrentChain();
       const reader = createNFTContractReader(chain);
