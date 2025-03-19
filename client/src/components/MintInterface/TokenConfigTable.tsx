@@ -14,6 +14,7 @@ import { mintNFT } from "@/services/nftMinting";
 import { useToast } from "@/hooks/use-toast";
 import { polygon } from "viem/chains";
 import { useState } from "react";
+import { getPublicClient } from "@/services/web3";
 
 export function TokenConfigTable() {
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
@@ -35,16 +36,21 @@ export function TokenConfigTable() {
         description: `Transaction hash: ${hash.slice(0, 10)}...`,
       });
 
-      // Wait for transaction confirmation
-      const response = await fetch(`https://api.polygonscan.com/api/v2/tx/${hash}`);
-      const data = await response.json();
+      // Wait for transaction confirmation using Viem
+      const publicClient = await getPublicClient();
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+        timeout: 60_000,
+      });
 
-      if (data.status === "1") {
+      if (receipt.status === "success") {
         toast({
           title: "NFT Minted Successfully",
           description: "Your NFT has been minted!",
           variant: "default",
         });
+      } else {
+        throw new Error("Transaction failed");
       }
     } catch (error) {
       console.error("Minting error:", error);
