@@ -13,7 +13,7 @@ import { useTokenConfigs } from "@/hooks/useTokenConfigs";
 import { mintNFT } from "@/services/nftMinting";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl } from "@/services/web3";
+import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl, NETWORK_CONFIG } from "@/services/web3";
 import { useAccount, useChainId } from "wagmi";
 
 export function TokenConfigTable() {
@@ -90,12 +90,14 @@ export function TokenConfigTable() {
     }
   };
 
+  const networkName = currentChain ? NETWORK_CONFIG[currentChain]?.name : "Unknown Network";
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Available Token Types</CardTitle>
         <CardDescription>
-          Current token configurations in the contract
+          Current token configurations on {networkName}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -129,7 +131,7 @@ export function TokenConfigTable() {
                       : config.maxSupply.toString()}
                   </TableCell>
                   <TableCell>
-                    {formatNativeCurrency(currentChain, config.price)}
+                    {currentChain && formatNativeCurrency(currentChain, config.price)}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
