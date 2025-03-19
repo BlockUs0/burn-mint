@@ -19,6 +19,12 @@ export function TokenConfigTable() {
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
   const { toast } = useToast();
   const [mintingTokenId, setMintingTokenId] = useState<string | null>(null);
+  const [currentChain, setCurrentChain] = useState<number | null>(null);
+
+  // Get current chain when component mounts
+  useState(() => {
+    getCurrentChain().then(chain => setCurrentChain(chain.id));
+  }, []);
 
   const handleMint = async (tokenId: bigint) => {
     try {
@@ -87,7 +93,7 @@ export function TokenConfigTable() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoadingConfigs ? (
+        {isLoadingConfigs || !currentChain ? (
           <div className="flex justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
@@ -117,7 +123,7 @@ export function TokenConfigTable() {
                       : config.maxSupply.toString()}
                   </TableCell>
                   <TableCell>
-                    {formatNativeCurrency(config.chainId, config.price)}
+                    {formatNativeCurrency(currentChain, config.price)}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
