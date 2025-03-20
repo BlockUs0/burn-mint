@@ -45,6 +45,7 @@ export const NETWORK_CONFIG = {
       decimals: 18,
     },
     blockExplorer: 'https://polygonscan.com',
+    tralaContract: '0xF9Ecd484e6a5495eFAc077B0f77F9311D0b38C63'
   },
   [sepolia.id]: {
     name: 'Sepolia',

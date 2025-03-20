@@ -1,7 +1,7 @@
+import { API_CONFIG } from "@/config/api";
 import { BurnRecord, BurnQueryDto } from "@/types";
 import { type Address } from "viem";
 
-import { API_CONFIG } from "@/config/api";
 const API_URL = API_CONFIG.URL;
 
 interface BurnProof {
@@ -167,13 +167,12 @@ export async function getMintSignature({
   url.searchParams.append("contractAddress", contractAddress);
 
   const response = await fetch(url.toString(), {
-    method: "POST",
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
-    body: JSON.stringify({ quantity: Math.floor(quantity) }),
   });
 
   if (!response.ok) {

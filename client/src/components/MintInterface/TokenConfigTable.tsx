@@ -50,17 +50,28 @@ export function TokenConfigTable() {
       }
 
       let signature = "0x"; // Default empty signature
-
       if (config.allowlistRequired) {
-        try {
-          const signatureResponse = await getMintSignature({
+
+        console.log(
+          {
             collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx", // TODO: Make this dynamic
             tokenId: tokenId.toString(),
             walletAddress: address,
             chainId: chain.id,
-            contractAddress: NETWORK_CONFIG[chain.id]?.contractAddress || "",
+            contractAddress: NETWORK_CONFIG[chain.id]?.tralaContract || "",
+            quantity: 1,
+          }
+        )
+        try {
+          const signatureResponse = await getMintSignature({
+            collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx",
+            tokenId: tokenId.toString(),
+            walletAddress: address,
+            chainId: chain.id,
+            contractAddress: NETWORK_CONFIG[chain.id]?.tralaContract || "",
             quantity: 1,
           });
+
 
           signature = signatureResponse.signature;
         } catch (error) {
