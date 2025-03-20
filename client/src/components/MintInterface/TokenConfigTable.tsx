@@ -152,7 +152,7 @@ export function TokenConfigTable() {
                 <TableHead>Max Supply</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Access</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -181,7 +181,13 @@ export function TokenConfigTable() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    {config.soulbound ? "Soulbound" : "Transferable"}
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      config.allowlistRequired 
+                        ? "bg-blue-100 text-blue-800" 
+                        : "bg-green-100 text-green-800"
+                    }`}>
+                      {config.allowlistRequired ? "Allowlisted" : "Public"}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <Button
