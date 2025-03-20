@@ -166,6 +166,7 @@ export async function getMintSignature({
   url.searchParams.append("chainId", chainId.toString());
   url.searchParams.append("contractAddress", contractAddress);
 
+  // Make GET request with body (non-standard but matching backend requirements)
   const response = await fetch(url.toString(), {
     method: "GET",
     headers: {
@@ -173,6 +174,8 @@ export async function getMintSignature({
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
+    // Include body even though it's a GET request
+    body: JSON.stringify({ quantity: Math.floor(quantity) }),
   });
 
   if (!response.ok) {
