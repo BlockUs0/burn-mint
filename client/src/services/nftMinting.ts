@@ -1,6 +1,5 @@
-import { createPublicClient, createWalletClient, custom, http, PublicClient, WalletClient, Address, Hash, Chain } from 'viem';
-import { sepolia, mainnet, polygon } from 'viem/chains';
-import { networks, getContractAddress } from '@/config/networks';
+import { createPublicClient, createWalletClient, custom, http, PublicClient, Address, Hash, Chain } from 'viem';
+import { getContractAddress } from '@/config/networks';
 
 // ABI for the NFT contract
 export const NFT_CONTRACT_ABI = [

@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl, NETWORK_CONFIG } from "@/services/web3";
 import { useAccount, useChainId } from "wagmi";
 import { getMintSignature } from "@/services/api";
+import { getContractAddress } from '@/config/networks';
 
 export function TokenConfigTable() {
   const chainId = useChainId();
@@ -57,10 +58,11 @@ export function TokenConfigTable() {
             tokenId: tokenId.toString(),
             walletAddress: address,
             chainId: chain.id,
-            contractAddress: getContractAddress(chain.id, 'tralaContract'), // Updated line
+            contractAddress: getContractAddress(chain.id, 'tralaContract'),
             quantity: 1,
           });
 
+          
           signature = signatureResponse;
         } catch (error) {
           console.error("Failed to get mint signature:", error);

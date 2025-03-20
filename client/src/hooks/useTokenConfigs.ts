@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createNFTContractReader } from "@/services/nftMinting";
-import type { TokenConfig } from "@/services/nftMinting";
 import { getCurrentChain } from "@/services/web3";
-import { useAccount, useChainId } from "wagmi";
+import { useChainId } from "wagmi";
 
 export function useTokenConfigs() {
   const chainId = useChainId();

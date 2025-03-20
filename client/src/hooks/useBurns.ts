@@ -21,7 +21,6 @@ export function useBurns(options: UseBurnsOptions = {}) {
   const burnMutation = useMutation({
     mutationFn: registerBurn,
     onSuccess: () => {
-      // Invalidate and refetch burns query after successful burn registration
       queryClient.invalidateQueries({ queryKey: ["burns"] });
       console.log("Burn registered successfully, burns data refetched");
     },
