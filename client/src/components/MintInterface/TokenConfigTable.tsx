@@ -51,29 +51,17 @@ export function TokenConfigTable() {
 
       let signature = "0x"; // Default empty signature
       if (config.allowlistRequired) {
-
-        console.log(
-          {
-            collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx", // TODO: Make this dynamic
-            tokenId: tokenId.toString(),
-            walletAddress: address,
-            chainId: chain.id,
-            contractAddress: NETWORK_CONFIG[chain.id]?.tralaContract || "",
-            quantity: 1,
-          }
-        )
         try {
           const signatureResponse = await getMintSignature({
             collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx",
             tokenId: tokenId.toString(),
             walletAddress: address,
             chainId: chain.id,
-            contractAddress: NETWORK_CONFIG[chain.id]?.tralaContract || "",
+            contractAddress: getContractAddress(chain.id, 'tralaContract'), // Updated line
             quantity: 1,
           });
 
-
-          signature = signatureResponse.signature;
+          signature = signatureResponse;
         } catch (error) {
           console.error("Failed to get mint signature:", error);
           toast({
@@ -84,7 +72,7 @@ export function TokenConfigTable() {
           return;
         }
       }
-
+      console.log(signature)
       const hash = await mintNFT({
         chain,
         tokenId,

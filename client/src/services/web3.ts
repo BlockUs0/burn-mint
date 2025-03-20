@@ -20,7 +20,11 @@ declare global {
 
 import { API_CONFIG } from "@/config/api";
 
-export const { NFT_ADDRESS: NFT_CONTRACT_ADDRESS, ZERO_ADDRESS, BURN_ADDRESS } = API_CONFIG.CONTRACTS;
+export const {
+  NFT_ADDRESS: NFT_CONTRACT_ADDRESS,
+  ZERO_ADDRESS,
+  BURN_ADDRESS,
+} = API_CONFIG.CONTRACTS;
 
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
@@ -31,29 +35,29 @@ export const SUPPORTED_CHAINS = {
 // Network specific configurations
 export const NETWORK_CONFIG = {
   [mainnet.id]: {
-    name: 'Ethereum',
+    name: "Ethereum",
     nativeCurrency: {
-      symbol: 'ETH',
+      symbol: "ETH",
       decimals: 18,
     },
-    blockExplorer: 'https://etherscan.io',
+    blockExplorer: "https://etherscan.io",
   },
   [polygon.id]: {
-    name: 'Polygon',
+    name: "Polygon",
     nativeCurrency: {
-      symbol: 'MATIC',
+      symbol: "MATIC",
       decimals: 18,
     },
-    blockExplorer: 'https://polygonscan.com',
-    tralaContract: '0xF9Ecd484e6a5495eFAc077B0f77F9311D0b38C63'
+    blockExplorer: "https://polygonscan.com",
+    tralaContract: "0xf9ecd484e6a5495efac077b0f77f9311d0b38c63",
   },
   [sepolia.id]: {
-    name: 'Sepolia',
+    name: "Sepolia",
     nativeCurrency: {
-      symbol: 'ETH',
+      symbol: "ETH",
       decimals: 18,
     },
-    blockExplorer: 'https://sepolia.etherscan.io',
+    blockExplorer: "https://sepolia.etherscan.io",
   },
 } as const;
 
@@ -189,7 +193,10 @@ class NFTService {
     return getPublicClient();
   }
 
-  async isApprovedForAll(owner: Address, tokenAddress: Address): Promise<boolean> {
+  async isApprovedForAll(
+    owner: Address,
+    tokenAddress: Address,
+  ): Promise<boolean> {
     try {
       const client = await this.getClient();
       const chainId = client.chain?.id;
@@ -231,7 +238,7 @@ class NFTService {
         functionName: "setApprovalForAll",
         args: [batchContractAddress as Address, true],
         account,
-        chain
+        chain,
       });
 
       return hash;
@@ -241,7 +248,10 @@ class NFTService {
     }
   }
 
-  async batchBurnNFTs(tokenAddress: Address, tokenIds: string[]): Promise<Hash> {
+  async batchBurnNFTs(
+    tokenAddress: Address,
+    tokenIds: string[],
+  ): Promise<Hash> {
     try {
       const { client, account } = await getWalletClient();
       const chain = await getCurrentChain();
@@ -253,7 +263,7 @@ class NFTService {
       const batchContractAddress = getBatchContractAddress(chain.id);
 
       // Convert tokenIds to BigInt
-      const tokenIdsBigInt = tokenIds.map(id => BigInt(id));
+      const tokenIdsBigInt = tokenIds.map((id) => BigInt(id));
 
       const hash = await client.writeContract({
         address: batchContractAddress as Address,
@@ -265,7 +275,7 @@ class NFTService {
           tokenIdsBigInt,
         ],
         account,
-        chain
+        chain,
       });
 
       return hash;

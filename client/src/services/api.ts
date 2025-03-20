@@ -127,10 +127,6 @@ export async function getBurns(
   return response.json();
 }
 
-export type AllowlistSignatureResponse = {
-  signature: string;
-};
-
 export async function getMintSignature({
   collectionId,
   tokenId,
@@ -145,7 +141,7 @@ export async function getMintSignature({
   chainId: number;
   contractAddress: string;
   quantity?: number;
-}): Promise<AllowlistSignatureResponse> {
+}): Promise<string> {
   const accessToken = localStorage.getItem("blockus_access_token");
   if (!accessToken) {
     throw new Error("No access token found");
@@ -174,8 +170,6 @@ export async function getMintSignature({
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
-    // Include body even though it's a GET request
-    body: JSON.stringify({ quantity: Math.floor(quantity) }),
   });
 
   if (!response.ok) {

@@ -1,12 +1,6 @@
 import { createPublicClient, createWalletClient, custom, http, PublicClient, WalletClient, Address, Hash, Chain } from 'viem';
 import { sepolia, mainnet, polygon } from 'viem/chains';
-
-// Contract addresses for different networks
-export const NFT_CONTRACT_ADDRESSES: Record<number, Address> = {
-  [sepolia.id]: '0x...' as Address, // TODO: Add Sepolia contract address
-  [mainnet.id]: '0x...' as Address, // TODO: Add Mainnet contract address
-  [polygon.id]: '0x99D5d48d99A1fa11Fe16F9bD51d4eBA84650ce1d' as Address,
-};
+import { networks, getContractAddress } from '@/config/networks';
 
 // ABI for the NFT contract
 export const NFT_CONTRACT_ABI = [
@@ -55,10 +49,7 @@ export interface TokenConfig {
 }
 
 export const createNFTContractReader = (chain: Chain) => {
-  const contractAddress = NFT_CONTRACT_ADDRESSES[chain.id];
-  if (!contractAddress) {
-    throw new Error(`No contract address found for chain ${chain.id}`);
-  }
+  const contractAddress = getContractAddress(chain.id, 'nft') as Address;
 
   const client = createPublicClient({
     chain,
@@ -108,10 +99,7 @@ export const mintNFT = async ({
 }): Promise<Hash> => {
   if (!window.ethereum) throw new Error('No wallet detected');
 
-  const contractAddress = NFT_CONTRACT_ADDRESSES[chain.id];
-  if (!contractAddress) {
-    throw new Error(`No contract address found for chain ${chain.id}`);
-  }
+  const contractAddress = getContractAddress(chain.id, 'nft') as Address;
 
   const client = createWalletClient({
     chain,
