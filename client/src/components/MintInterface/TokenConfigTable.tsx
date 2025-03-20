@@ -19,6 +19,7 @@ import { getMintSignature } from "@/services/api";
 
 export function TokenConfigTable() {
   const chainId = useChainId();
+  const { address } = useAccount(); // Move useAccount to component level
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
   const { toast } = useToast();
   const [mintingTokenId, setMintingTokenId] = useState<string | null>(null);
@@ -37,6 +38,10 @@ export function TokenConfigTable() {
     try {
       setMintingTokenId(tokenId.toString());
 
+      if (!address) {
+        throw new Error("Wallet not connected");
+      }
+
       const chain = await getCurrentChain();
       const config = tokenConfigs?.find(c => c.tokenId === tokenId);
 
@@ -48,11 +53,6 @@ export function TokenConfigTable() {
 
       if (config.allowlistRequired) {
         try {
-          const { address } = useAccount();
-          if (!address) {
-            throw new Error("Wallet not connected");
-          }
-
           const signatureResponse = await getMintSignature({
             collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx", // TODO: Make this dynamic
             tokenId: tokenId.toString(),
