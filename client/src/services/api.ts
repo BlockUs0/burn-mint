@@ -151,6 +151,12 @@ export async function getMintSignature({
     throw new Error("No access token found");
   }
 
+  // Validate quantity is a positive integer
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    throw new Error("Quantity must be a positive integer");
+  }
+
+  // Build URL with query parameters
   const url = new URL(
     `${API_URL}/v1/players/wallets/collections/${collectionId}/nfts/${tokenId}/mint-signature`
   );
@@ -159,15 +165,16 @@ export async function getMintSignature({
   url.searchParams.append("wallet", walletAddress);
   url.searchParams.append("chainId", chainId.toString());
   url.searchParams.append("contractAddress", contractAddress);
-  url.searchParams.append("quantity", quantity.toString());
+  url.searchParams.append("quantity", Math.floor(quantity).toString()); // Ensure integer
 
   const response = await fetch(url.toString(), {
-    method: "GET",
+    method: "POST", 
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
+    body: JSON.stringify({ quantity: Math.floor(quantity) }), 
   });
 
   if (!response.ok) {

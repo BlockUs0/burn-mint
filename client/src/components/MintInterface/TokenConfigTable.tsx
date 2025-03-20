@@ -19,7 +19,7 @@ import { getMintSignature } from "@/services/api";
 
 export function TokenConfigTable() {
   const chainId = useChainId();
-  const { address } = useAccount(); // Move useAccount to component level
+  const { address } = useAccount();
   const { data: tokenConfigs, isLoading: isLoadingConfigs } = useTokenConfigs();
   const { toast } = useToast();
   const [mintingTokenId, setMintingTokenId] = useState<string | null>(null);
