@@ -159,6 +159,7 @@ export async function getMintSignature({
   url.searchParams.append("wallet", walletAddress);
   url.searchParams.append("chainId", chainId.toString());
   url.searchParams.append("contractAddress", contractAddress);
+  url.searchParams.append("quantity", quantity.toString());
 
   const response = await fetch(url.toString(), {
     method: "GET",
@@ -167,7 +168,6 @@ export async function getMintSignature({
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
-    body: JSON.stringify({ quantity }),
   });
 
   if (!response.ok) {

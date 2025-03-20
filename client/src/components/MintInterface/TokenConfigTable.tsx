@@ -119,11 +119,21 @@ export function TokenConfigTable() {
       }
     } catch (error) {
       console.error("Minting error:", error);
-      toast({
-        title: "Minting Failed",
-        description: error instanceof Error ? error.message : "Failed to mint NFT",
-        variant: "destructive",
-      });
+
+      // Check if it's a user rejection
+      if (error?.message?.includes("User denied") || error?.message?.includes("User rejected")) {
+        toast({
+          title: "Transaction Cancelled",
+          description: "You cancelled the transaction",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Minting Failed",
+          description: error instanceof Error ? error.message : "Failed to mint NFT",
+          variant: "destructive",
+        });
+      }
     } finally {
       setMintingTokenId(null);
     }
