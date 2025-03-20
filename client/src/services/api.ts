@@ -165,15 +165,15 @@ export async function getMintSignature({
   url.searchParams.append("wallet", walletAddress);
   url.searchParams.append("chainId", chainId.toString());
   url.searchParams.append("contractAddress", contractAddress);
-  url.searchParams.append("quantity", Math.floor(quantity).toString()); // Ensure integer
 
   const response = await fetch(url.toString(), {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${accessToken}`,
       "X-ACCESS-TOKEN": accessToken,
     },
+    body: JSON.stringify({ quantity: Math.floor(quantity) }),
   });
 
   if (!response.ok) {
