@@ -126,3 +126,55 @@ export async function getBurns(
   }
   return response.json();
 }
+
+export type AllowlistSignatureResponse = {
+  signature: string;
+};
+
+export async function getMintSignature({
+  collectionId,
+  tokenId,
+  walletAddress,
+  chainId,
+  contractAddress,
+  quantity = 1,
+}: {
+  collectionId: string;
+  tokenId: string;
+  walletAddress: string;
+  chainId: number;
+  contractAddress: string;
+  quantity?: number;
+}): Promise<AllowlistSignatureResponse> {
+  const accessToken = localStorage.getItem("blockus_access_token");
+  if (!accessToken) {
+    throw new Error("No access token found");
+  }
+
+  const url = new URL(
+    `${API_URL}/v1/players/wallets/collections/${collectionId}/nfts/${tokenId}/mint-signature`
+  );
+
+  // Add query parameters
+  url.searchParams.append("wallet", walletAddress);
+  url.searchParams.append("chainId", chainId.toString());
+  url.searchParams.append("contractAddress", contractAddress);
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}`,
+      "X-ACCESS-TOKEN": accessToken,
+    },
+    body: JSON.stringify({ quantity }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Signature fetch failed:", errorText);
+    throw new Error(`Failed to fetch mint signature: ${errorText}`);
+  }
+
+  return response.json();
+}

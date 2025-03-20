@@ -97,7 +97,7 @@ export const mintNFT = async ({
   chain,
   tokenId,
   amount = BigInt(1),
-  signature = '0x' // Default empty signature for free minting
+  signature = '0x' // Add signature parameter with default empty value
 }: {
   chain: Chain;
   tokenId: bigint;

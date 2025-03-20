@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl, NETWORK_CONFIG } from "@/services/web3";
 import { useAccount, useChainId } from "wagmi";
+import { getMintSignature } from "@/services/api";
 
 export function TokenConfigTable() {
   const chainId = useChainId();
@@ -37,10 +38,47 @@ export function TokenConfigTable() {
       setMintingTokenId(tokenId.toString());
 
       const chain = await getCurrentChain();
+      const config = tokenConfigs?.find(c => c.tokenId === tokenId);
+
+      if (!config) {
+        throw new Error("Token configuration not found");
+      }
+
+      let signature = "0x"; // Default empty signature
+
+      if (config.allowlistRequired) {
+        try {
+          const { address } = useAccount();
+          if (!address) {
+            throw new Error("Wallet not connected");
+          }
+
+          const signatureResponse = await getMintSignature({
+            collectionId: "2DBt6gXTtwNMBkllG3qoKf8xwBKx", // TODO: Make this dynamic
+            tokenId: tokenId.toString(),
+            walletAddress: address,
+            chainId: chain.id,
+            contractAddress: NETWORK_CONFIG[chain.id]?.contractAddress || "",
+            quantity: 1,
+          });
+
+          signature = signatureResponse.signature;
+        } catch (error) {
+          console.error("Failed to get mint signature:", error);
+          toast({
+            title: "Minting Not Allowed",
+            description: "You are not allowlisted for this token",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       const hash = await mintNFT({
         chain,
         tokenId,
         amount: BigInt(1),
+        signature, // Pass the signature to the mint function
       });
 
       const explorerUrl = getExplorerTxUrl(chain.id, hash);
