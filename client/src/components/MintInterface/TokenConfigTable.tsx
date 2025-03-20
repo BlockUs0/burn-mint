@@ -13,10 +13,10 @@ import { useTokenConfigs } from "@/hooks/useTokenConfigs";
 import { mintNFT } from "@/services/nftMinting";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl, NETWORK_CONFIG } from "@/services/web3";
+import { getPublicClient, getCurrentChain, formatNativeCurrency, getExplorerTxUrl } from "@/services/web3";
 import { useAccount, useChainId } from "wagmi";
 import { getMintSignature } from "@/services/api";
-import { getContractAddress } from '@/config/networks';
+import { getContractAddress, networks } from '@/config/networks';
 
 export function TokenConfigTable() {
   const chainId = useChainId();
@@ -62,7 +62,6 @@ export function TokenConfigTable() {
             quantity: 1,
           });
 
-          
           signature = signatureResponse;
         } catch (error) {
           console.error("Failed to get mint signature:", error);
@@ -74,13 +73,13 @@ export function TokenConfigTable() {
           return;
         }
       }
-      console.log(signature)
+
       const hash = await mintNFT({
         chain,
         tokenId,
         amount: BigInt(1),
         signature,
-        price: config.price, // Pass the price from config
+        price: config.price,
       });
 
       const explorerUrl = getExplorerTxUrl(chain.id, hash);
@@ -140,7 +139,7 @@ export function TokenConfigTable() {
     }
   };
 
-  const networkName = currentChain ? NETWORK_CONFIG[currentChain]?.name : "Unknown Network";
+  const networkName = currentChain && networks[currentChain as keyof typeof networks]?.displayName || "Unknown Network";
 
   return (
     <Card className="w-full max-w-2xl mx-auto">

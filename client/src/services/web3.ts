@@ -10,7 +10,7 @@ import {
   Chain,
 } from "viem";
 import { mainnet, polygon, sepolia } from "viem/chains";
-import { hasBatchSupport, getBatchContractAddress } from "@/config/networks";
+import { networks, isChainSupported, getContractAddress } from "@/config/networks";
 
 declare global {
   interface Window {
@@ -32,47 +32,22 @@ export const SUPPORTED_CHAINS = {
   SEPOLIA: sepolia,
 } as const;
 
-// Network specific configurations
-export const NETWORK_CONFIG = {
-  [mainnet.id]: {
-    name: "Ethereum",
-    nativeCurrency: {
-      symbol: "ETH",
-      decimals: 18,
-    },
-    blockExplorer: "https://etherscan.io",
-  },
-  [polygon.id]: {
-    name: "Polygon",
-    nativeCurrency: {
-      symbol: "MATIC",
-      decimals: 18,
-    },
-    blockExplorer: "https://polygonscan.com",
-    tralaContract: "0xf9ecd484e6a5495efac077b0f77f9311d0b38c63",
-  },
-  [sepolia.id]: {
-    name: "Sepolia",
-    nativeCurrency: {
-      symbol: "ETH",
-      decimals: 18,
-    },
-    blockExplorer: "https://sepolia.etherscan.io",
-  },
-} as const;
-
 // Function to get block explorer URL for a transaction
 export function getExplorerTxUrl(chainId: number, txHash: string): string {
-  const config = NETWORK_CONFIG[chainId as keyof typeof NETWORK_CONFIG];
-  if (!config) throw new Error(`Unsupported chain ID: ${chainId}`);
-  return `${config.blockExplorer}/tx/${txHash}`;
+  if (!isChainSupported(chainId)) {
+    throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+  return `${networks[chainId].chain.blockExplorers.default.url}/tx/${txHash}`;
 }
 
 // Function to format native currency amount
 export function formatNativeCurrency(chainId: number, amount: bigint): string {
-  const config = NETWORK_CONFIG[chainId as keyof typeof NETWORK_CONFIG];
-  if (!config) throw new Error(`Unsupported chain ID: ${chainId}`);
-  return `${(Number(amount) / 10 ** config.nativeCurrency.decimals).toFixed(4)} ${config.nativeCurrency.symbol}`;
+  if (!isChainSupported(chainId)) {
+    throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+
+  const chain = networks[chainId].chain;
+  return `${(Number(amount) / 10 ** chain.nativeCurrency.decimals).toFixed(4)} ${chain.nativeCurrency.symbol}`;
 }
 
 // Function to get the current chain from ethereum provider
@@ -201,11 +176,11 @@ class NFTService {
       const client = await this.getClient();
       const chainId = client.chain?.id;
 
-      if (!chainId || !hasBatchSupport(chainId)) {
-        throw new Error("Batch operations not supported on this network");
+      if (!chainId || !isChainSupported(chainId)) {
+        throw new Error("Chain not supported for batch operations");
       }
 
-      const batchContractAddress = getBatchContractAddress(chainId);
+      const batchContractAddress = getContractAddress(chainId, 'batch');
 
       const isApproved = await client.readContract({
         address: tokenAddress,
@@ -226,11 +201,11 @@ class NFTService {
       const { client, account } = await getWalletClient();
       const chain = await getCurrentChain();
 
-      if (!hasBatchSupport(chain.id)) {
-        throw new Error("Batch operations not supported on this network");
+      if (!isChainSupported(chain.id)) {
+        throw new Error("Chain not supported for batch operations");
       }
 
-      const batchContractAddress = getBatchContractAddress(chain.id);
+      const batchContractAddress = getContractAddress(chain.id, 'batch');
 
       const hash = await client.writeContract({
         address: tokenAddress,
@@ -256,11 +231,11 @@ class NFTService {
       const { client, account } = await getWalletClient();
       const chain = await getCurrentChain();
 
-      if (!hasBatchSupport(chain.id)) {
-        throw new Error("Batch operations not supported on this network");
+      if (!isChainSupported(chain.id)) {
+        throw new Error("Chain not supported for batch operations");
       }
 
-      const batchContractAddress = getBatchContractAddress(chain.id);
+      const batchContractAddress = getContractAddress(chain.id, 'batch');
 
       // Convert tokenIds to BigInt
       const tokenIdsBigInt = tokenIds.map((id) => BigInt(id));
