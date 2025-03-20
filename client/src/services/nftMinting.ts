@@ -97,12 +97,14 @@ export const mintNFT = async ({
   chain,
   tokenId,
   amount = BigInt(1),
-  signature = '0x' // Add signature parameter with default empty value
+  signature = '0x', // Add signature parameter with default empty value
+  price = BigInt(0), // Add price parameter
 }: {
   chain: Chain;
   tokenId: bigint;
   amount?: bigint;
   signature?: `0x${string}`;
+  price?: bigint;
 }): Promise<Hash> => {
   if (!window.ethereum) throw new Error('No wallet detected');
 
@@ -124,5 +126,6 @@ export const mintNFT = async ({
     functionName: 'mint',
     args: [account, tokenId, amount, signature],
     account,
+    value: price * amount, // Calculate total price based on amount
   });
 };

@@ -78,7 +78,8 @@ export function TokenConfigTable() {
         chain,
         tokenId,
         amount: BigInt(1),
-        signature, // Pass the signature to the mint function
+        signature,
+        price: config.price, // Pass the price from config
       });
 
       const explorerUrl = getExplorerTxUrl(chain.id, hash);
