@@ -74,6 +74,10 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     url.searchParams.append("withMetadata", "true");
     url.searchParams.append("pageSize", pageSize.toString());
     url.searchParams.append("refreshCache", "true");
+    // Add contract address for ZKSync
+    if (chainId === 324) { // ZKSync Era Mainnet
+      url.searchParams.append("contractAddresses[]", "0xc880a0e89fe281bb95f8835c3512b7fb863ec8f3");
+    }
     if (pageKey) {
       url.searchParams.append("pageKey", pageKey);
     }
