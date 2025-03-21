@@ -30,6 +30,19 @@ export const SUPPORTED_CHAINS = {
   SEPOLIA: sepolia,
 } 
 
+export function getExplorerTxUrl(chainId: number, hash: string): string {
+  if (!isChainSupported(chainId)) {
+    throw new Error(`Chain ID ${chainId} is not supported`);
+  }
+
+  const chain = Object.values(SUPPORTED_CHAINS).find(c => c.id === chainId);
+  if (!chain) {
+    throw new Error('Chain not found');
+  }
+
+  return `${chain.blockExplorers?.default?.url}/tx/${hash}` || '#';
+}
+
 export function formatNativeCurrency(amount: bigint, chainId: number): string {
   if (!isChainSupported(chainId)) {
     throw new Error(`Chain ID ${chainId} is not supported`);
