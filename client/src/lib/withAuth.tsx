@@ -64,7 +64,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
   function WithAuthComponent(props: P) {
     const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
     const [isChecking, setIsChecking] = useState<boolean>(true);
-    const [, setLocation] = useLocation();
+    const [location, setLocation] = useLocation();
     const { toast } = useToast();
     const [mockExpTime, setMockExpTime] = useState<number | null>(null);
 
@@ -74,11 +74,15 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       const checkTokenValidity = () => {
         const token = localStorage.getItem("blockus_access_token");
         
-        // If no token exists, redirect to home page
+        // If no token exists, redirect to home page (unless we're already there)
         if (!token) {
           setIsTokenValid(false);
           setIsChecking(false);
-          setLocation("/");
+          
+          // Only redirect if not already on the home page
+          if (location !== "/") {
+            setLocation("/");
+          }
           return;
         }
 
@@ -126,8 +130,10 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
         localStorage.removeItem("blockus_access_token");
         localStorage.removeItem("blockus_user_id");
         
-        // Redirect to home page
-        setLocation("/");
+        // Redirect to home page if not already there
+        if (location !== "/") {
+          setLocation("/");
+        }
         
         // Show toast notification
         toast({
@@ -149,14 +155,19 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
           window.clearInterval(intervalId);
         }
       };
-    }, [setLocation, toast]);
+    }, [location, setLocation, toast]);
 
     // Show loading or nothing while checking
     if (isChecking) {
       return null; // Or a loading spinner if desired
     }
 
-    // Only render the protected component if token is valid
+    // Special handling for home page route - always render it
+    if (location === "/") {
+      return <Component {...props} />;
+    }
+    
+    // For other routes, only render if token is valid
     return isTokenValid ? <Component {...props} /> : null;
   };
   

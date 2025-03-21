@@ -8,8 +8,9 @@ import ProtectedPage from "@/pages/protected";
 import AuthTestPage from "@/pages/auth-test";
 import { Web3Provider } from "@/lib/web3Provider";
 import { NFTProvider } from "@/context/NFTContext";
+import withAuth from "@/lib/withAuth";
 
-function Router() {
+function RouterComponent() {
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -25,6 +26,9 @@ function Router() {
     </Switch>
   );
 }
+
+// Apply authentication to all routes
+const Router = withAuth(RouterComponent);
 
 function App() {
   return (
