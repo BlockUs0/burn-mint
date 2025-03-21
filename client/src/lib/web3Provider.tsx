@@ -1,17 +1,18 @@
 import { createConfig, WagmiProvider, useConfig } from 'wagmi';
-import { mainnet, sepolia, polygon } from 'viem/chains';
+import { mainnet, sepolia, polygon, zksync } from 'viem/chains';
 import { http } from 'viem';
 import { injected } from 'wagmi/connectors';
 import { isChainSupported } from '@/config/networks';
 
-const chains = [mainnet, sepolia, polygon] as const;
+const chains = [mainnet, sepolia, polygon, zksync] as const;
 
 const config = createConfig({
   chains,
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
-    [polygon.id]: http()
+    [polygon.id]: http(),
+    [zksync.id]: http(),
   },
   connectors: [injected()]
 });

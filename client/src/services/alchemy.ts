@@ -1,7 +1,6 @@
 import { NFT, NFTCollection } from "@/types";
 import {
   networks,
-  type SupportedChainId,
   isChainSupported,
 } from "@/config/networks";
 
@@ -74,7 +73,7 @@ async function getAllNFTPages(baseUrl: string, owner: string): Promise<NFT[]> {
     url.searchParams.append("owner", owner);
     url.searchParams.append("withMetadata", "true");
     url.searchParams.append("pageSize", pageSize.toString());
-    url.searchParams.append("refreshCache", "true"); // Force refresh cache
+    url.searchParams.append("refreshCache", "true");
     if (pageKey) {
       url.searchParams.append("pageKey", pageKey);
     }

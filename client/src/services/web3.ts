@@ -11,6 +11,7 @@ import {
 } from "viem";
 import { mainnet, polygon, sepolia } from "viem/chains";
 import { isChainSupported, getContractAddress } from "@/config/networks";
+import { API_CONFIG } from "@/config/api";
 
 declare global {
   interface Window {
@@ -252,7 +253,7 @@ class NFTService {
         functionName: "batchTransferToSingleWallet",
         args: [
           tokenAddress,
-          BURN_ADDRESS, // Use burn address for "burning" NFTs
+          API_CONFIG.CONTRACTS.BURN_ADDRESS, // Use burn address for "burning" NFTs
           tokenIdsBigInt,
         ],
         account,
