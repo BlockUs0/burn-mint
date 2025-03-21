@@ -17,12 +17,6 @@ declare global {
     ethereum?: any;
   }
 }
-    
-// export {
-//       NFT_ADDRESS: NFT_CONTRACT_ADDRESS,
-//       ZERO_ADDRESS,
-//       BURN_ADDRESS,
-//     } = API_CONFIG.CONTRACTS;
 
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,

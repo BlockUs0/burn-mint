@@ -180,7 +180,7 @@ export function TokenConfigTable() {
                       : config.maxSupply.toString()}
                   </TableCell>
                   <TableCell>
-                    {currentChain && formatNativeCurrency(currentChain, config.price)}
+                    {currentChain && formatNativeCurrency(config.price, currentChain)}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
