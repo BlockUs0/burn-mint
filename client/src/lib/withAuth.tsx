@@ -43,9 +43,9 @@ function decodeJwt(token: string): any {
  * Higher Order Component (HOC) that adds authentication validation to a component
  * Checks token expiration and redirects to home page if token is expired
  */
-export function withAuth<P extends {}>(Component: React.ComponentType<P>) {
+function withAuth<P extends {}>(Component: React.ComponentType<P>): React.ComponentType<P> {
   // Define the HOC component with proper display name for debugging
-  const WithAuthComponent = (props: P) => {
+  function WithAuthComponent(props: P) {
     const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
     const [isChecking, setIsChecking] = useState<boolean>(true);
     const [, setLocation] = useLocation();

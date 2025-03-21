@@ -12,8 +12,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/protected" component={ProtectedPage} />
-      <Route component={NotFound} />
+      <Route path="/protected">
+        <ProtectedPage />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }

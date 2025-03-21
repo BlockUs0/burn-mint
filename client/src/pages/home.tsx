@@ -6,10 +6,12 @@ import { useWallet } from "@/hooks/useWallet";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBurns } from "@/hooks/useBurns";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
-  const isAuthenticated = !!localStorage.getItem("auth_token");
+  const isAuthenticated = !!localStorage.getItem("blockus_access_token");
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
     limit: 20,
@@ -22,7 +24,12 @@ export default function Home() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
             Phoenix NFT Burning
           </h1>
-          <WalletButton />
+          <div className="flex items-center gap-4">
+            <Link href="/protected">
+              <Button variant="outline">Protected Page</Button>
+            </Link>
+            <WalletButton />
+          </div>
         </header>
 
         <main>
