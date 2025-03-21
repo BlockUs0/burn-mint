@@ -9,7 +9,7 @@ import {
   Hash,
   Chain,
 } from "viem";
-import { mainnet, polygon, sepolia } from "viem/chains";
+import { mainnet, polygon, sepolia, zksync } from "viem/chains";
 import { isChainSupported, getContractAddress } from "@/config/networks";
 import { API_CONFIG } from "@/config/api";
 
@@ -23,6 +23,7 @@ export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
   POLYGON: polygon,
   SEPOLIA: sepolia,
+  ZKSYNC: zksync
 } 
 
 export function getExplorerTxUrl(chainId: number, hash: string): string {

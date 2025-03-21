@@ -85,7 +85,7 @@ export function useWallet() {
       localStorage.setItem("auth_token", accessToken);
 
       // Get user ID using the current chain
-      await getWalletAddress(chain.name.toLowerCase());
+      // await getWalletAddress(chain.name.toLowerCase());
 
       toast({
         title: "Authentication Successful",

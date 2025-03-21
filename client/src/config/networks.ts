@@ -51,7 +51,7 @@ export const networks = {
     alchemyUrl: "https://zksync-mainnet.g.alchemy.com/v2", //zksync-mainnet.g.alchemy.com/
     contracts: {
       nft: undefined,
-      batch: "0x7Ee524e2902A267d6983Fd7849FC43aF039f5626",
+      batch: "0x903331Afa5DEc4894403dcd7f26D4A981BB04Be4",
       tralaContract: undefined,
     },
     nativeCurrency: {

@@ -63,7 +63,7 @@ export async function registerBurn(data: {
 }): Promise<BurnRecord> {
   const burnData: BurnRegistrationData = {
     tokenIds: data.tokenIds,
-    chain: "polygon",
+    chain: "zksync", // TODO DYNAMIC
     walletAddress: data.walletAddress,
     burnProof: {
       type: "evm",
