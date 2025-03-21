@@ -39,6 +39,22 @@ function decodeJwt(token: string): any {
   }
 }
 
+// Mock expiration option - when true, the token will expire in 60 seconds
+// This is set to false by default and can be enabled for testing
+let MOCK_EXPIRATION = false;
+let MOCK_EXPIRATION_TIME = 60 * 1000; // 60 seconds in milliseconds
+
+/**
+ * Function to enable mock expiration for testing
+ * @param enable Whether to enable mocking
+ * @param durationMs Mock expiration duration in milliseconds (default: 60000ms = 1 minute)
+ */
+export function setMockExpiration(enable: boolean, durationMs: number = 60000) {
+  MOCK_EXPIRATION = enable;
+  MOCK_EXPIRATION_TIME = durationMs;
+  console.log(`Mock expiration ${enable ? 'enabled' : 'disabled'}, duration: ${durationMs}ms`);
+}
+
 /**
  * Higher Order Component (HOC) that adds authentication validation to a component
  * Checks token expiration and redirects to home page if token is expired
@@ -50,6 +66,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
     const [isChecking, setIsChecking] = useState<boolean>(true);
     const [, setLocation] = useLocation();
     const { toast } = useToast();
+    const [mockExpTime, setMockExpTime] = useState<number | null>(null);
 
     useEffect(() => {
       let intervalId: number;
@@ -76,9 +93,22 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
           return;
         }
 
-        // Convert exp timestamp to milliseconds (JWT exp is in seconds)
-        const expirationTime = decoded.exp * 1000;
-        const currentTime = Date.now();
+        // Calculate real token expiration
+        const realExpirationTime = decoded.exp * 1000;
+        let currentTime = Date.now();
+        let expirationTime = realExpirationTime;
+        
+        // When mock expiration is enabled, use mock timing for testing
+        if (MOCK_EXPIRATION) {
+          if (!mockExpTime) {
+            // Initialize mock expiration time (current time + mock duration)
+            const newMockTime = Date.now() + MOCK_EXPIRATION_TIME;
+            setMockExpTime(newMockTime);
+            expirationTime = newMockTime;
+          } else {
+            expirationTime = mockExpTime;
+          }
+        }
         
         // Check if token is expired
         if (currentTime >= expirationTime) {

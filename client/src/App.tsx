@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import ProtectedPage from "@/pages/protected";
+import AuthTestPage from "@/pages/auth-test";
 import { Web3Provider } from "@/lib/web3Provider";
 import { NFTProvider } from "@/context/NFTContext";
 
@@ -14,6 +15,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/protected">
         <ProtectedPage />
+      </Route>
+      <Route path="/auth-test">
+        <AuthTestPage />
       </Route>
       <Route>
         <NotFound />

@@ -28,6 +28,9 @@ export default function Home() {
             <Link href="/protected">
               <Button variant="outline">Protected Page</Button>
             </Link>
+            <Link href="/auth-test">
+              <Button variant="outline">Auth Test</Button>
+            </Link>
             <WalletButton />
           </div>
         </header>
