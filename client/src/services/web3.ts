@@ -10,7 +10,8 @@ import {
   Chain,
 } from "viem";
 import { mainnet, polygon, sepolia } from "viem/chains";
-import { networks, isChainSupported, getContractAddress } from "@/config/networks";
+import { networks, isChainSupported, getContractAddress } from "@/config/netw
+rks";
 
 declare global {
   interface Window {
@@ -30,24 +31,7 @@ export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
   POLYGON: polygon,
   SEPOLIA: sepolia,
-} as const;
-
-// Function to get block explorer URL for a transaction
-export function getExplorerTxUrl(chainId: number, txHash: string): string {
-  if (!isChainSupported(chainId)) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
-  }
-  return `${networks[chainId].chain.blockExplorers.default.url}/tx/${txHash}`;
-}
-
-// Function to format native currency amount
-export function formatNativeCurrency(chainId: number, amount: bigint): string {
-  if (!isChainSupported(chainId)) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
-  }
-
-  const chain = networks[chainId].chain;
-  return `${(Number(amount) / 10 ** chain.nativeCurrency.decimals).toFixed(4)} ${chain.nativeCurrency.symbol}`;
+} as cCurrency.decimals).toFixed(4)} ${chain.nativeCurrency.symbol}`;
 }
 
 // Function to get the current chain from ethereum provider

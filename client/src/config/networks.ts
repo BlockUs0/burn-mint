@@ -11,6 +11,11 @@ export const networks = {
       batch: undefined, // Not deployed on mainnet yet
       tralaContract: undefined, // Not deployed on mainnet
     },
+    nativeCurrency: {
+      symbol: "ETH",
+      decimals: 18,
+    },
+    blockExplorer: "https://etherscan.io",
   },
   [sepolia.id]: {
     chain: sepolia,
@@ -23,17 +28,6 @@ export const networks = {
       tralaContract: undefined, // Not deployed on sepolia
     },
   },
-  [goerli.id]: {
-    chain: goerli,
-    displayName: 'Goerli',
-    icon: '🟡',
-    alchemyUrl: 'https://eth-goerli.g.alchemy.com/v2',
-    contracts: {
-      nft: '0x85be9de7a369850a964616a2c04d79000d168dea',
-      batch: undefined, // Not deployed on goerli yet
-      tralaContract: undefined, // Not deployed on goerli
-    },
-  },
   [polygon.id]: {
     chain: polygon,
     displayName: 'Polygon',
@@ -44,6 +38,11 @@ export const networks = {
       batch: '0x3Fe5F8beD9821f2027bea6794b2d46c1eD7caB43',
       tralaContract: '0xF9Ecd484e6a5495eFAc077B0f77F9311D0b38C63',
     },
+    nativeCurrency: {
+      symbol: "MATIC",
+      decimals: 18,
+    },
+    blockExplorer: "https://polygonscan.com",
   },
 } as const;
 
