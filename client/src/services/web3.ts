@@ -29,6 +29,25 @@ export const SUPPORTED_CHAINS = {
   POLYGON: polygon,
   SEPOLIA: sepolia,
 } 
+
+export function formatNativeCurrency(amount: bigint, chainId: number): string {
+  if (!isChainSupported(chainId)) {
+    throw new Error(`Chain ID ${chainId} is not supported`);
+  }
+
+  const chain = Object.values(SUPPORTED_CHAINS).find(c => c.id === chainId);
+  if (!chain) {
+    throw new Error('Chain not found');
+  }
+
+  // Convert to decimals (assuming 18 decimals which is standard for ETH/MATIC)
+  const decimals = 18;
+  const formattedAmount = Number(amount) / Math.pow(10, decimals);
+  
+  // Format with 4 decimal places max
+  return `${formattedAmount.toFixed(4)} ${chain.nativeCurrency.symbol}`;
+}
+
     
 // Function to get the current chain from ethereum provider
 export async function getCurrentChain(): Promise<Chain> {
