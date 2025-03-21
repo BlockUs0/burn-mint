@@ -1,4 +1,4 @@
-import { mainnet, sepolia, goerli, polygon } from 'viem/chains';
+import { mainnet, sepolia, polygon } from 'viem/chains';
 
 export const networks = {
   [mainnet.id]: {

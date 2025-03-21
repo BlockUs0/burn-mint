@@ -10,30 +10,26 @@ import {
   Chain,
 } from "viem";
 import { mainnet, polygon, sepolia } from "viem/chains";
-import { networks, isChainSupported, getContractAddress } from "@/config/netw
-rks";
+import { isChainSupported, getContractAddress } from "@/config/networks";
 
 declare global {
   interface Window {
     ethereum?: any;
   }
 }
-
-import { API_CONFIG } from "@/config/api";
-
-export const {
-  NFT_ADDRESS: NFT_CONTRACT_ADDRESS,
-  ZERO_ADDRESS,
-  BURN_ADDRESS,
-} = API_CONFIG.CONTRACTS;
+    
+// export {
+//       NFT_ADDRESS: NFT_CONTRACT_ADDRESS,
+//       ZERO_ADDRESS,
+//       BURN_ADDRESS,
+//     } = API_CONFIG.CONTRACTS;
 
 export const SUPPORTED_CHAINS = {
   MAINNET: mainnet,
   POLYGON: polygon,
   SEPOLIA: sepolia,
-} as cCurrency.decimals).toFixed(4)} ${chain.nativeCurrency.symbol}`;
-}
-
+} 
+    
 // Function to get the current chain from ethereum provider
 export async function getCurrentChain(): Promise<Chain> {
   if (!window.ethereum) throw new Error("No wallet detected");
