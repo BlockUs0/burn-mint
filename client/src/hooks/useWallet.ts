@@ -5,6 +5,7 @@ import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { getWeb3Challenge, web3Login, getWalletAddress } from "@/services/auth";
 import { useNetwork } from "@/lib/web3Provider";
+import { useAuth } from "@/context/AuthContext";
 
 export function useWallet() {
   const { toast } = useToast();
@@ -14,6 +15,7 @@ export function useWallet() {
   const { signMessageAsync } = useSignMessage();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { chain } = useNetwork();
+  const auth = useAuth();
 
   const connect = useCallback(async () => {
     if (!window.ethereum) {
@@ -79,11 +81,12 @@ export function useWallet() {
         chain: "ethereum", // Always use ethereum for web3Login
       });
 
-      // Store the access token first
+      // Store tokens in localStorage for backwards compatibility
       localStorage.setItem("blockus_access_token", accessToken);
-      // Also store auth_token for backward compatibility
-      localStorage.setItem("auth_token", accessToken);
-
+      
+      // Use the AuthContext login (this will setup token expiration)
+      auth.login(accessToken, 20); // Use 20 seconds for testing as specified
+      
       // Get user ID using the current chain
       // await getWalletAddress(chain.name.toLowerCase());
 
@@ -106,20 +109,17 @@ export function useWallet() {
       });
 
       // Clean up any partial authentication state
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("blockus_access_token");
-      localStorage.removeItem("blockus_user_id");
+      auth.logout();
     } finally {
       setIsAuthenticating(false);
     }
-  }, [address, signMessageAsync, toast, chain]);
+  }, [address, signMessageAsync, toast, chain, auth]);
 
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("blockus_access_token");
-      localStorage.removeItem("blockus_user_id");
+      // Use AuthContext to handle logout which will clear tokens
+      auth.logout();
       toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected",
@@ -132,7 +132,7 @@ export function useWallet() {
         description: "Failed to disconnect wallet",
       });
     }
-  }, [disconnectAsync, toast]);
+  }, [disconnectAsync, toast, auth]);
 
   const state: WalletState = {
     status: isAuthenticating

@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import { Web3Provider } from "@/lib/web3Provider";
 import { NFTProvider } from "@/context/NFTContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 function Router() {
   return (
@@ -20,10 +21,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Web3Provider>
-        <NFTProvider>
-          <Router />
-          <Toaster />
-        </NFTProvider>
+        <AuthProvider>
+          <NFTProvider>
+            <Router />
+            <Toaster />
+          </NFTProvider>
+        </AuthProvider>
       </Web3Provider>
     </QueryClientProvider>
   );
