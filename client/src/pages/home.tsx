@@ -18,12 +18,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-            Phoenix NFT Burning
-          </h1>
-          <WalletButton />
-        </header>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent mb-8">
+          Phoenix NFT Burning
+        </h1>
 
         <main>
           {!walletStatus || walletStatus === "disconnected" ? (
