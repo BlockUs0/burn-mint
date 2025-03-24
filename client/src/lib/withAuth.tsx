@@ -42,7 +42,7 @@ function decodeJwt(token: string): any {
 // Mock expiration option - when true, the token will expire in 60 seconds
 // This is set to false by default and can be enabled for testing
 let MOCK_EXPIRATION = false;
-let MOCK_EXPIRATION_TIME = 60 * 1000; // 60 seconds in milliseconds
+let MOCK_EXPIRATION_TIME = 10 * 1000;
 
 /**
  * Function to enable mock expiration for testing
