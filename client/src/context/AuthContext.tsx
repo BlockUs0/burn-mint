@@ -25,6 +25,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Function to handle login and set up expiration timer
   const login = (accessToken: string, expiresIn: number) => {
+    console.log(`Login with token, expires in ${expiresIn} seconds`);
+    
     // Store token in localStorage
     localStorage.setItem('auth_token', accessToken);
     setToken(accessToken);
@@ -51,11 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(window.tokenExpirationTimer);
     }
     
-    // Hard code to 20 seconds for testing
-    // For production, use the expiresIn parameter: const expirationTime = expiresIn * 1000;
-    const expirationTime = 20 * 1000; // 20 seconds for testing
+    // Use the provided expiresIn parameter (in seconds) and convert to milliseconds
+    const expirationTime = expiresIn * 1000;
     
-    console.log(`Setting up token expiration timer for ${expirationTime / 1000} seconds`);
+    console.log(`Setting up token expiration timer for ${expiresIn} seconds`);
     
     // Set timeout to logout when token expires
     window.tokenExpirationTimer = setTimeout(() => {
