@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useWallet } from '@/hooks/useWallet';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useDisconnect } from 'wagmi';
 
 // Define the type for our context
 interface AuthContextType {
@@ -25,7 +25,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { disconnect } = useWallet();
+  const { disconnectAsync } = useDisconnect();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [sessionExpiry, setSessionExpiry] = useState<Date | null>(null);
@@ -79,15 +79,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Logout function
-  const logout = () => {
-    disconnect();
+  const logout = useCallback(async () => {
+    try {
+      // Disconnect wallet if available
+      await disconnectAsync();
+    } catch (error) {
+      console.error("Error disconnecting wallet:", error);
+    }
+    
+    // Clear auth tokens
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("blockus_access_token");
+    localStorage.removeItem("blockus_user_id");
+    
+    // Update state
     setIsAuthenticated(false);
     setSessionExpiry(null);
     setTimeRemaining(null);
     setWarningShown(false);
     
     console.log("User logged out due to session expiry");
-  };
+  }, [disconnectAsync]);
 
   // Check token on component mount and when token changes
   useEffect(() => {

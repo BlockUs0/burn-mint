@@ -6,12 +6,7 @@ import { cn } from '@/lib/utils';
 
 export function SessionTimer() {
   const { timeRemaining, sessionExpiry, refreshSession, isAuthenticated } = useAuth();
-  const [formattedTime, setFormattedTime] = useState<string>('');
-  
-  // Don't show the timer if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
+  const [formattedTime, setFormattedTime] = useState<string>('--:--');
   
   // Format the time remaining for display
   useEffect(() => {
@@ -23,6 +18,11 @@ export function SessionTimer() {
       setFormattedTime('--:--');
     }
   }, [timeRemaining]);
+  
+  // Don't show the timer if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
   
   // Determine the color based on time remaining
   const getTimerColor = () => {
