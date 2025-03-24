@@ -85,18 +85,22 @@ export function useWallet() {
       localStorage.setItem("blockus_access_token", accessToken);
       
       // Try to parse the JWT token to get actual expiration time
-      let expiryTime = 20; // Default to 20 seconds for testing
+      let expiryTime = 60; // Default to 60 seconds if parsing fails
       try {
         // Split the JWT token and decode the payload (middle part)
         const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
         console.log('Token payload:', tokenPayload);
         
         if (tokenPayload.exp) {
-          // Calculate seconds until expiry
+          // Calculate seconds until expiry with a 2-minute buffer
           const expiryDate = new Date(tokenPayload.exp * 1000);
           const currentDate = new Date();
-          expiryTime = Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
-          console.log(`Token expires at: ${expiryDate.toLocaleString()}, seconds until expiry: ${expiryTime}`);
+          const secondsUntilExpiry = Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
+          // Add 2 minute (120 seconds) buffer to ensure logout happens before token actually expires
+          expiryTime = secondsUntilExpiry - 120;
+          // Make sure we don't have a negative expiry time
+          if (expiryTime < 10) expiryTime = 10; // Minimum 10 seconds
+          console.log(`Token expires at: ${expiryDate.toLocaleString()}, seconds until expiry with buffer: ${expiryTime}`);
         }
       } catch (parseError) {
         console.warn("Could not parse JWT expiration, using default:", parseError);
