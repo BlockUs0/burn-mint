@@ -11,15 +11,12 @@ import { useNetwork } from "@/lib/web3Provider";
 import { useSwitchChain } from "wagmi";
 import { networks } from "@/config/networks";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
-import { useCallback, useEffect } from "react";
 
 export function WalletButton() {
   const { status, address, connect, disconnect, authenticate } = useWallet();
   const { chain, isSupported } = useNetwork();
   const { switchChain } = useSwitchChain();
   const { toast } = useToast();
-  const { isAuthenticated, logout } = useAuth();
 
   if (status === 'connecting' || status === 'authenticating') {
     return (
@@ -31,19 +28,17 @@ export function WalletButton() {
   }
 
   // If connected and authenticated, show network switcher
-  if (status === 'connected' && address && isAuthenticated) {
+  if (status === 'connected' && address && localStorage.getItem('auth_token')) {
     const currentNetwork = chain?.id ? networks[chain.id] : networks[1];
-    
-    // Use useEffect to show warnings instead of during render
-    useEffect(() => {
-      if (!isSupported) {
-        toast({
-          variant: "destructive",
-          title: "Unsupported Network",
-          description: "Please switch to a supported network"
-        });
-      }
-    }, [isSupported, toast]);
+
+    // Show warning if on unsupported network
+    if (!isSupported) {
+      toast({
+        variant: "destructive",
+        title: "Unsupported Network",
+        description: "Please switch to a supported network"
+      });
+    }
 
     return (
       <DropdownMenu>
@@ -81,10 +76,8 @@ export function WalletButton() {
               {network.icon} {network.displayName}
             </DropdownMenuItem>
           ))}
-          <DropdownMenuItem onClick={() => {
-            logout(); // This calls the AuthContext logout which also calls disconnect
-          }}>
-            Logout
+          <DropdownMenuItem onClick={disconnect}>
+            Disconnect
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

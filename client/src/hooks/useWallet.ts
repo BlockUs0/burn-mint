@@ -1,12 +1,10 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { WalletState } from "@/types";
 import { useToast } from "./use-toast";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { getWeb3Challenge, web3Login, getWalletAddress } from "@/services/auth";
 import { useNetwork } from "@/lib/web3Provider";
-// Don't import useAuth here to avoid circular dependencies
-// We'll handle tokens directly and let AuthContext observe them
 
 export function useWallet() {
   const { toast } = useToast();

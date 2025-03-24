@@ -6,21 +6,13 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import { Web3Provider } from "@/lib/web3Provider";
 import { NFTProvider } from "@/context/NFTContext";
-import { AuthProvider } from "@/context/AuthContext";
-
-import { Header } from "@/components/Header";
 
 function Router() {
   return (
-    <>
-      <Header />
-      <main className="container py-6">
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-    </>
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
@@ -28,12 +20,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Web3Provider>
-        <AuthProvider>
-          <NFTProvider>
-            <Router />
-            <Toaster />
-          </NFTProvider>
-        </AuthProvider>
+        <NFTProvider>
+          <Router />
+          <Toaster />
+        </NFTProvider>
       </Web3Provider>
     </QueryClientProvider>
   );
