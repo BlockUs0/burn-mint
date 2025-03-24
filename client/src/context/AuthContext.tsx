@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
+import { useTokenExpiration } from '@/hooks/useTokenExpiration';
 
 // Define the context type
 interface AuthContextType {
@@ -22,6 +23,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('auth_token'));
   const [, navigate] = useLocation();
+  const { showExpirationToast, showExpirationWarningToast } = useTokenExpiration();
   
   // Function to handle login and set up expiration timer
   const login = (accessToken: string, expiresIn: number) => {
@@ -36,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   // Function to handle logout
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('blockus_access_token');
     localStorage.removeItem('blockus_user_id');
@@ -44,16 +46,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // For testing, we can console.log when logout happens
     console.log('Logged out due to token expiration');
     
-    // Show a toast notification if we have access to window
-    if (typeof window !== 'undefined' && window.showExpirationToast) {
-      window.showExpirationToast();
-    }
+    // Show a toast notification
+    showExpirationToast();
     
     navigate('/'); // Redirect to home page
-  };
+  }, [navigate, showExpirationToast]);
   
   // Function to set up token expiration timer
-  const setupExpirationTimer = (expiresIn: number) => {
+  const setupExpirationTimer = useCallback((expiresIn: number) => {
     // Clear any existing timers
     if (window.tokenExpirationTimer) {
       clearTimeout(window.tokenExpirationTimer);
@@ -64,12 +64,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     console.log(`Setting up token expiration timer for ${expiresIn} seconds`);
     
+    // Set up warning notification if we have more than 30 seconds left
+    if (expiresIn > 30) {
+      // Show a warning 30 seconds before expiration
+      setTimeout(() => {
+        console.log('Token expiring soon, showing warning...');
+        showExpirationWarningToast(30);
+      }, expirationTime - 30000); // 30 seconds before expiration
+    }
+    
     // Set timeout to logout when token expires
     window.tokenExpirationTimer = setTimeout(() => {
       console.log('Token expired, logging out...');
       logout();
     }, expirationTime);
-  };
+  }, [logout, showExpirationWarningToast]);
   
   // On component mount, check if token exists and set up expiration timer
   useEffect(() => {
@@ -124,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearTimeout(window.tokenExpirationTimer);
       }
     };
-  }, []);
+  }, [logout, setupExpirationTimer]);
   
   // Add to global window interface to allow the timer
   if (typeof window !== 'undefined') {
@@ -142,6 +151,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 declare global {
   interface Window {
     tokenExpirationTimer: NodeJS.Timeout | null;
-    showExpirationToast: () => void;
   }
 }
