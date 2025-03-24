@@ -116,9 +116,15 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
         
         // Check if token is expired
         if (currentTime >= expirationTime) {
+          // Set token as invalid
           setIsTokenValid(false);
           setIsChecking(false);
+          
+          // Log the user out
           handleLogout();
+          
+          // Reset mock time
+          setMockExpTime(null);
         } else {
           setIsTokenValid(true);
           setIsChecking(false);
@@ -126,6 +132,8 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       };
 
       const handleLogout = () => {
+        console.log("Logging out due to token expiration");
+        
         // Clear token from localStorage
         localStorage.removeItem("blockus_access_token");
         localStorage.removeItem("blockus_user_id");
@@ -148,12 +156,21 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       
       // Set up interval to check token validity every second
       intervalId = window.setInterval(checkTokenValidity, 1000);
+      
+      // Add event listener for force check events
+      const handleForceCheck = () => {
+        console.log("Force checking token validity");
+        checkTokenValidity();
+      };
+      
+      window.addEventListener('force-token-check', handleForceCheck);
 
-      // Cleanup interval on component unmount
+      // Cleanup interval and event listener on component unmount
       return () => {
         if (intervalId) {
           window.clearInterval(intervalId);
         }
+        window.removeEventListener('force-token-check', handleForceCheck);
       };
     }, [location, setLocation, toast]);
 

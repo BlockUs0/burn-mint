@@ -23,10 +23,22 @@ function AuthTestPage() {
       // Create countdown timer
       const timer = setInterval(() => {
         setTimeLeft(prev => {
-          if (prev === null || prev <= 0) {
+          if (prev === null) {
             clearInterval(timer);
             return 0;
           }
+          
+          if (prev <= 1) {
+            // When timer reaches zero, ensure token is actually checked right away
+            // This forces an immediate check rather than waiting for the next interval
+            // in the withAuth component
+            const forceRecheckEvent = new CustomEvent('force-token-check');
+            window.dispatchEvent(forceRecheckEvent);
+            
+            clearInterval(timer);
+            return 0;
+          }
+          
           return prev - 1;
         });
       }, 1000);
@@ -38,8 +50,8 @@ function AuthTestPage() {
     }
   }, [mockEnabled, mockDuration]);
   
-  // Decode and display token info
-  useEffect(() => {
+  // Function to decode and update token info
+  const updateTokenInfo = () => {
     const token = localStorage.getItem("blockus_access_token");
     if (token) {
       try {
@@ -63,8 +75,21 @@ function AuthTestPage() {
         }
       } catch (error) {
         console.error("Error decoding token:", error);
+        setTokenInfo(null);
       }
+    } else {
+      setTokenInfo(null);
     }
+  };
+
+  // Run token info update on component mount
+  useEffect(() => {
+    updateTokenInfo();
+    
+    // Also update when token changes or expires
+    const intervalId = setInterval(updateTokenInfo, 2000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -72,13 +97,31 @@ function AuthTestPage() {
       <h1 className="text-3xl font-bold mb-4">Authentication Test Page</h1>
       
       <div className="bg-card p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4">Token Information</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Token Information</h2>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={updateTokenInfo}
+          >
+            Refresh Token Info
+          </Button>
+        </div>
+        
         {tokenInfo ? (
           <div className="space-y-2">
             <p><strong>Subject:</strong> {tokenInfo.sub}</p>
             {tokenInfo.exp && (
               <p>
                 <strong>Expires:</strong> {new Date(tokenInfo.exp * 1000).toLocaleString()}
+                {" - "}
+                <span className={
+                  Date.now() > tokenInfo.exp * 1000 
+                    ? "text-red-500 font-bold" 
+                    : "text-green-500"
+                }>
+                  {Date.now() > tokenInfo.exp * 1000 ? "EXPIRED" : "VALID"}
+                </span>
               </p>
             )}
             <pre className="bg-muted p-4 rounded-md text-sm overflow-auto">
@@ -123,8 +166,17 @@ function AuthTestPage() {
           </div>
           
           {timeLeft !== null && (
-            <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-md">
+            <div className={`px-4 py-2 rounded-md ${
+              timeLeft > 5 
+                ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200" 
+                : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+            }`}>
               Token will expire in: <strong>{timeLeft}</strong> seconds
+              {timeLeft === 0 && (
+                <div className="mt-2 font-bold">
+                  Session expired! You should be redirected to home page and see a toast notification.
+                </div>
+              )}
             </div>
           )}
         </div>
