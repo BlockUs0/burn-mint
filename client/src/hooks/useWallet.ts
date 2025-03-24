@@ -84,7 +84,6 @@ export function useWallet() {
       // Store tokens in localStorage for backwards compatibility
       localStorage.setItem("blockus_access_token", accessToken);
       
-      // Try to parse the JWT token to get actual expiration time
       let expiryTime = 60; // Default to 60 seconds if parsing fails
       try {
         // Split the JWT token and decode the payload (middle part)
@@ -92,11 +91,9 @@ export function useWallet() {
         console.log('Token payload:', tokenPayload);
         
         if (tokenPayload.exp) {
-          // Calculate seconds until expiry with a 2-minute buffer
           const expiryDate = new Date(tokenPayload.exp * 1000);
           const currentDate = new Date();
           const secondsUntilExpiry = Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
-          // Add 2 minute (120 seconds) buffer to ensure logout happens before token actually expires
           expiryTime = secondsUntilExpiry - 120;
           // Make sure we don't have a negative expiry time
           if (expiryTime < 10) expiryTime = 10; // Minimum 10 seconds
@@ -108,9 +105,6 @@ export function useWallet() {
       
       // Use the AuthContext login (this will setup token expiration)
       auth.login(accessToken, expiryTime);
-      
-      // Get user ID using the current chain
-      // await getWalletAddress(chain.name.toLowerCase());
 
       toast({
         title: "Authentication Successful",

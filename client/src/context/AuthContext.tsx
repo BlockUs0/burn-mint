@@ -29,11 +29,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (accessToken: string, expiresIn: number) => {
     console.log(`Login with token, expires in ${expiresIn} seconds`);
     
-    // Store token in localStorage
     localStorage.setItem('auth_token', accessToken);
     setToken(accessToken);
     
-    // Set up expiration timer
     setupExpirationTimer(expiresIn);
   };
   
@@ -43,37 +41,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('blockus_access_token');
     localStorage.removeItem('blockus_user_id');
     setToken(null);
-    // For testing, we can console.log when logout happens
-    console.log('Logged out due to token expiration');
     
-    // Show a toast notification
     showExpirationToast();
     
-    navigate('/'); // Redirect to home page
+    navigate('/');
   }, [navigate, showExpirationToast]);
   
   // Function to set up token expiration timer
   const setupExpirationTimer = useCallback((expiresIn: number) => {
-    // Clear any existing timers
     if (window.tokenExpirationTimer) {
       clearTimeout(window.tokenExpirationTimer);
     }
     
-    // Use the provided expiresIn parameter (in seconds) and convert to milliseconds
     const expirationTime = expiresIn * 1000;
     
     console.log(`Setting up token expiration timer for ${expiresIn} seconds`);
     
-    // Set up warning notification if we have more than 30 seconds left
     if (expiresIn > 30) {
-      // Show a warning 30 seconds before expiration
       setTimeout(() => {
         console.log('Token expiring soon, showing warning...');
         showExpirationWarningToast(30);
-      }, expirationTime - 30000); // 30 seconds before expiration
+      }, expirationTime - 30000);
     }
     
-    // Set timeout to logout when token expires
     window.tokenExpirationTimer = setTimeout(() => {
       console.log('Token expired, logging out...');
       logout();
@@ -86,7 +76,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (token) {
       try {
-        // Use the actual JWT expiration time
         try {
           // Decode the JWT token
           const tokenData = JSON.parse(atob(token.split('.')[1]));
@@ -101,7 +90,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Time remaining:', Math.round((expiresAt - currentTime) / 1000), 'seconds');
           
           if (expiresAt > currentTime) {
-            // Token is still valid, set up expiration timer with 2-minute buffer
             const timeRemaining = expiresAt - currentTime;
             const expiryTimeWithBuffer = Math.floor(timeRemaining / 1000) - 120; // 2-minute buffer
             
@@ -117,8 +105,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (decodeError) {
           console.error('Error decoding JWT token:', decodeError);
-          // Continue with a default timeout if decoding fails
-          console.log('Using default 60 second expiration timer due to decode error');
           setupExpirationTimer(60);
         }
       } catch (error) {
