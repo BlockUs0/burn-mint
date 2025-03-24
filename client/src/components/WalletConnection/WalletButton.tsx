@@ -12,6 +12,7 @@ import { useSwitchChain } from "wagmi";
 import { networks } from "@/config/networks";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useCallback, useEffect } from "react";
 
 export function WalletButton() {
   const { status, address, connect, disconnect, authenticate } = useWallet();
@@ -32,15 +33,17 @@ export function WalletButton() {
   // If connected and authenticated, show network switcher
   if (status === 'connected' && address && isAuthenticated) {
     const currentNetwork = chain?.id ? networks[chain.id] : networks[1];
-
-    // Show warning if on unsupported network
-    if (!isSupported) {
-      toast({
-        variant: "destructive",
-        title: "Unsupported Network",
-        description: "Please switch to a supported network"
-      });
-    }
+    
+    // Use useEffect to show warnings instead of during render
+    useEffect(() => {
+      if (!isSupported) {
+        toast({
+          variant: "destructive",
+          title: "Unsupported Network",
+          description: "Please switch to a supported network"
+        });
+      }
+    }, [isSupported, toast]);
 
     return (
       <DropdownMenu>

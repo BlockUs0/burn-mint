@@ -148,7 +148,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [isAuthenticated, sessionExpiry, warningShown]);
+  }, [isAuthenticated, sessionExpiry, warningShown, logout, toast]);
 
   // Context value that will be provided
   const contextValue: AuthContextType = {
