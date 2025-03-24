@@ -192,7 +192,16 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       
       // Add event listener for force check events
       const handleForceCheck = () => {
-        console.log("Force checking token validity");
+        console.log("Force checking token validity triggered by event");
+        
+        // Force immediate expiration when mocking
+        if (MOCK_EXPIRATION && mockExpTime) {
+          console.log("FORCE-EXPIRING token via mock time");
+          // Setting mock time to past date forces immediate expiration
+          setMockExpTime(Date.now() - 1000);
+        }
+        
+        // Then perform the validity check that will detect the expired token
         checkTokenValidity();
       };
       

@@ -46,7 +46,7 @@ export function BurnHistory({ burns }: BurnHistoryProps) {
         </TableHeader>
         <TableBody>
           {burns.map((burn) => (
-            <TableRow key={burn.burnProof.txHash}>
+            <TableRow key={`${burn.burnProof.txHash}-${burn.tokenId}`}>
               <TableCell>
                 {(() => {
                   try {

@@ -15,45 +15,59 @@ function AuthTestPage() {
 
   // Update mock settings when toggled
   useEffect(() => {
+    // Apply mock setting with current duration
+    console.log(`Setting mock expiration to ${mockEnabled ? 'enabled' : 'disabled'}, duration: ${mockDuration * 1000}ms`);
     setMockExpiration(mockEnabled, mockDuration * 1000);
     
     if (mockEnabled) {
+      // Initialize the countdown timer
       setTimeLeft(mockDuration);
       
-      // Create countdown timer
-      const timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev === null) {
-            clearInterval(timer);
-            return 0;
-          }
-          
-          if (prev <= 1) {
-            // When timer reaches zero, ensure token is actually checked right away
-            // This forces an immediate check rather than waiting for the next interval
-            // in the withAuth component
-            console.log("Timer expired! Dispatching force-token-check event");
-            
-            // Dispatch the event with both methods to ensure it's captured
-            try {
-              window.dispatchEvent(new CustomEvent('force-token-check'));
-              window.dispatchEvent(new Event('force-token-check'));
-              console.log("Events dispatched successfully");
-            } catch (err) {
-              console.error("Error dispatching event:", err);
-            }
-            
-            clearInterval(timer);
-            return 0;
-          }
-          
-          return prev - 1;
-        });
-      }, 1000);
+      // Create a more reliable countdown timer
+      const startTime = Date.now();
+      const expirationTime = startTime + (mockDuration * 1000); 
       
-      // Clean up timer
-      return () => clearInterval(timer);
+      const timer = setInterval(() => {
+        const now = Date.now();
+        const remaining = Math.max(0, Math.ceil((expirationTime - now) / 1000));
+        
+        console.log(`Countdown: ${remaining} seconds remaining until token expiration`);
+        setTimeLeft(remaining);
+        
+        if (remaining <= 0) {
+          console.log("===== TIMER EXPIRED! =====");
+          console.log("===== FORCING TOKEN CHECK =====");
+          
+          // First, log current localStorage state
+          const token = localStorage.getItem("blockus_access_token");
+          console.log("Current token exists:", !!token);
+          
+          // When timer reaches zero, ensure token is actually checked immediately
+          try {
+            // Create and dispatch a custom event to trigger the recheck
+            const forceRecheckEvent = new CustomEvent('force-token-check');
+            window.dispatchEvent(forceRecheckEvent);
+            
+            // Also dispatch as regular Event for maximum compatibility
+            window.dispatchEvent(new Event('force-token-check'));
+            
+            console.log("Force token check events dispatched successfully");
+          } catch (err) {
+            console.error("Error dispatching force check event:", err);
+          }
+          
+          // Clear the timer once we're done
+          clearInterval(timer);
+        }
+      }, 500); // Check twice per second for more accuracy
+      
+      // Clean up timer on unmount or when settings change
+      return () => {
+        console.log("Cleaning up timer");
+        clearInterval(timer);
+      };
     } else {
+      // Reset when disabled
       setTimeLeft(null);
     }
   }, [mockEnabled, mockDuration]);
