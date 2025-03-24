@@ -5,19 +5,18 @@ import alchemyService from "@/services/alchemy";
 import nftService from "@/services/web3";
 import { useToast } from "@/hooks/use-toast";
 import { useNetwork } from "@/lib/web3Provider";
+import { useAuth } from "@/context/AuthContext";
 import { Address } from "viem";
 
 export function useNFTs() {
   const { address, status } = useWallet();
   const { chain } = useNetwork();
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(
-    null,
-  );
+  const { isAuthenticated, refreshSession } = useAuth();
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [selectedNFTs, setSelectedNFTs] = useState<Set<string>>(new Set());
   const [isApprovedForAll, setIsApprovedForAll] = useState(false);
   const [showNFTGrid, setShowNFTGrid] = useState(false);
   const { toast } = useToast();
-  const isAuthenticated = !!localStorage.getItem("auth_token");
 
   const {
     data: collections = [],
@@ -32,6 +31,9 @@ export function useNFTs() {
         if (!chain?.id) throw new Error("No chain selected");
         if (!isAuthenticated) throw new Error("Not authenticated");
 
+        // Refresh the session on API calls
+        refreshSession();
+        
         return alchemyService.getNFTCollections(address, chain.id);
       } catch (error) {
         console.error("Error fetching collections:", error);
@@ -43,8 +45,7 @@ export function useNFTs() {
         return [];
       }
     },
-    enabled:
-      status === "connected" && !!address && !!chain?.id && isAuthenticated,
+    enabled: status === "connected" && !!address && !!chain?.id && isAuthenticated,
     retry: 1,
     staleTime: 30000,
   });
@@ -53,6 +54,9 @@ export function useNFTs() {
     if (!address || !selectedCollection || !chain?.id) return;
 
     try {
+      // Refresh the session on API calls
+      refreshSession();
+      
       const isApproved = await nftService.isApprovedForAll(
         address as Address,
         selectedCollection as `0x${string}`,
@@ -68,7 +72,7 @@ export function useNFTs() {
       });
       return false;
     }
-  }, [address, selectedCollection, chain?.id, toast]);
+  }, [address, selectedCollection, chain?.id, toast, refreshSession]);
 
   useEffect(() => {
     if (status !== "connected" || !isAuthenticated) {
@@ -85,6 +89,9 @@ export function useNFTs() {
 
   const selectCollection = useCallback(
     (address: string) => {
+      // Refresh the session on user interactions
+      refreshSession();
+      
       setShowNFTGrid(false);
       if (address === "") {
         setSelectedCollection(null);
@@ -95,10 +102,13 @@ export function useNFTs() {
       }
       console.log("Collection selected:", address);
     },
-    [checkApproval],
+    [checkApproval, refreshSession],
   );
 
   const viewCollection = useCallback(async () => {
+    // Refresh the session on user interactions
+    refreshSession();
+    
     if (!isApprovedForAll || !selectedCollection) {
       console.log(
         "Cannot view collection - not approved or no collection selected",
@@ -116,9 +126,12 @@ export function useNFTs() {
         description: "Failed to view collection",
       });
     }
-  }, [isApprovedForAll, selectedCollection, checkApproval, toast]);
+  }, [isApprovedForAll, selectedCollection, toast, refreshSession]);
 
   const toggleNFTSelection = useCallback((tokenId: string) => {
+    // Refresh the session on user interactions
+    refreshSession();
+    
     setSelectedNFTs((prev) => {
       const newSelection = new Set(prev);
       if (newSelection.has(tokenId)) {
@@ -128,7 +141,7 @@ export function useNFTs() {
       }
       return newSelection;
     });
-  }, []);
+  }, [refreshSession]);
 
   return {
     collections,

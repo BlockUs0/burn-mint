@@ -11,12 +11,14 @@ import { useNetwork } from "@/lib/web3Provider";
 import { useSwitchChain } from "wagmi";
 import { networks } from "@/config/networks";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export function WalletButton() {
   const { status, address, connect, disconnect, authenticate } = useWallet();
   const { chain, isSupported } = useNetwork();
   const { switchChain } = useSwitchChain();
   const { toast } = useToast();
+  const { isAuthenticated, logout } = useAuth();
 
   if (status === 'connecting' || status === 'authenticating') {
     return (
@@ -28,7 +30,7 @@ export function WalletButton() {
   }
 
   // If connected and authenticated, show network switcher
-  if (status === 'connected' && address && localStorage.getItem('auth_token')) {
+  if (status === 'connected' && address && isAuthenticated) {
     const currentNetwork = chain?.id ? networks[chain.id] : networks[1];
 
     // Show warning if on unsupported network
@@ -76,8 +78,10 @@ export function WalletButton() {
               {network.icon} {network.displayName}
             </DropdownMenuItem>
           ))}
-          <DropdownMenuItem onClick={disconnect}>
-            Disconnect
+          <DropdownMenuItem onClick={() => {
+            logout(); // This calls the AuthContext logout which also calls disconnect
+          }}>
+            Logout
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
