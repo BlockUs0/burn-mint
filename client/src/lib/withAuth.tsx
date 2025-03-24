@@ -72,10 +72,12 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       let intervalId: number;
 
       const checkTokenValidity = () => {
+        console.log("Checking token validity...");
         const token = localStorage.getItem("blockus_access_token");
         
         // If no token exists, redirect to home page (unless we're already there)
         if (!token) {
+          console.log("No token found in localStorage");
           setIsTokenValid(false);
           setIsChecking(false);
           
@@ -91,6 +93,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
         
         // If decoding failed or there's no expiration date, consider token invalid
         if (!decoded || !decoded.exp) {
+          console.log("Token could not be decoded or has no expiration", decoded);
           setIsTokenValid(false);
           setIsChecking(false);
           handleLogout();
@@ -104,18 +107,35 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
         
         // When mock expiration is enabled, use mock timing for testing
         if (MOCK_EXPIRATION) {
+          console.log("Mock expiration is enabled");
           if (!mockExpTime) {
             // Initialize mock expiration time (current time + mock duration)
             const newMockTime = Date.now() + MOCK_EXPIRATION_TIME;
+            console.log("Setting new mock expiration time:", new Date(newMockTime).toLocaleString());
             setMockExpTime(newMockTime);
             expirationTime = newMockTime;
           } else {
             expirationTime = mockExpTime;
+            console.log(
+              "Using existing mock expiration time:",
+              new Date(expirationTime).toLocaleString(),
+              "Current time:",
+              new Date(currentTime).toLocaleString()
+            );
           }
+        } else {
+          console.log(
+            "Real token expiration:",
+            new Date(realExpirationTime).toLocaleString(),
+            "Current time:",
+            new Date(currentTime).toLocaleString()
+          );
         }
         
         // Check if token is expired
         if (currentTime >= expirationTime) {
+          console.log("TOKEN IS EXPIRED! Current time >= expiration time");
+          
           // Set token as invalid
           setIsTokenValid(false);
           setIsChecking(false);
@@ -126,6 +146,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
           // Reset mock time
           setMockExpTime(null);
         } else {
+          console.log("Token is still valid, expires in", Math.floor((expirationTime - currentTime) / 1000), "seconds");
           setIsTokenValid(true);
           setIsChecking(false);
         }
@@ -134,13 +155,24 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
       const handleLogout = () => {
         console.log("Logging out due to token expiration");
         
+        // Get current token before clearing (for debugging)
+        const token = localStorage.getItem("blockus_access_token");
+        console.log("Token before removal:", token ? "exists" : "none");
+        
         // Clear token from localStorage
         localStorage.removeItem("blockus_access_token");
         localStorage.removeItem("blockus_user_id");
         
+        // Verify token was removed
+        const tokenAfter = localStorage.getItem("blockus_access_token");
+        console.log("Token after removal:", tokenAfter ? "still exists" : "removed successfully");
+        
         // Redirect to home page if not already there
         if (location !== "/") {
+          console.log("Redirecting from", location, "to /");
           setLocation("/");
+        } else {
+          console.log("Already on home page, no redirect needed");
         }
         
         // Show toast notification
@@ -149,6 +181,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
           title: "Session Expired",
           description: "Your session has expired. Please login again.",
         });
+        console.log("Toast notification displayed");
       };
 
       // Check token validity immediately
@@ -163,6 +196,7 @@ function withAuth<P extends {}>(Component: React.ComponentType<P>): React.Compon
         checkTokenValidity();
       };
       
+      // Listen for both regular Event and CustomEvent
       window.addEventListener('force-token-check', handleForceCheck);
 
       // Cleanup interval and event listener on component unmount

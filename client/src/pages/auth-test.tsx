@@ -32,8 +32,16 @@ function AuthTestPage() {
             // When timer reaches zero, ensure token is actually checked right away
             // This forces an immediate check rather than waiting for the next interval
             // in the withAuth component
-            const forceRecheckEvent = new CustomEvent('force-token-check');
-            window.dispatchEvent(forceRecheckEvent);
+            console.log("Timer expired! Dispatching force-token-check event");
+            
+            // Dispatch the event with both methods to ensure it's captured
+            try {
+              window.dispatchEvent(new CustomEvent('force-token-check'));
+              window.dispatchEvent(new Event('force-token-check'));
+              console.log("Events dispatched successfully");
+            } catch (err) {
+              console.error("Error dispatching event:", err);
+            }
             
             clearInterval(timer);
             return 0;
