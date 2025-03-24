@@ -6,10 +6,11 @@ import { useWallet } from "@/hooks/useWallet";
 import { LockIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBurns } from "@/hooks/useBurns";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const { status: walletStatus, address } = useWallet();
-  const isAuthenticated = !!localStorage.getItem("auth_token");
+  const { isAuthenticated } = useAuth();
   const { burns } = useBurns({
     walletAddress: address as `0x${string}`,
     limit: 20,

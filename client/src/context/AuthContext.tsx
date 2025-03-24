@@ -52,7 +52,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     // Hard code to 20 seconds for testing
+    // For production, use the expiresIn parameter: const expirationTime = expiresIn * 1000;
     const expirationTime = 20 * 1000; // 20 seconds for testing
+    
+    console.log(`Setting up token expiration timer for ${expirationTime / 1000} seconds`);
     
     // Set timeout to logout when token expires
     window.tokenExpirationTimer = setTimeout(() => {
@@ -63,24 +66,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // On component mount, check if token exists and set up expiration timer
   useEffect(() => {
+    console.log('AuthContext useEffect running, token:', token ? 'exists' : 'not found');
+    
     if (token) {
       try {
         // For testing, just set a 20-second expiration timer
         setupExpirationTimer(20); // 20 seconds
         
-        // Later we will implement the JWT decoding logic
-        // const tokenData = JSON.parse(atob(token.split('.')[1]));
-        // const expiresAt = tokenData.exp * 1000; // Convert to milliseconds
-        // const currentTime = Date.now();
-        
-        // if (expiresAt > currentTime) {
-        //   // Token is still valid, set up expiration timer
-        //   const timeRemaining = expiresAt - currentTime;
-        //   setupExpirationTimer(timeRemaining / 1000); // Convert back to seconds
-        // } else {
-        //   // Token has already expired
-        //   logout();
-        // }
+        // Commented JWT decoding logic - we'll use this after testing
+        /* 
+        // Uncomment this to use the actual JWT expiration time
+        try {
+          // Decode the JWT token
+          const tokenData = JSON.parse(atob(token.split('.')[1]));
+          console.log('Decoded token data:', tokenData);
+          
+          // Get expiration time
+          const expiresAt = tokenData.exp * 1000; // Convert to milliseconds
+          const currentTime = Date.now();
+          
+          console.log('Token expires at:', new Date(expiresAt).toLocaleTimeString());
+          console.log('Current time:', new Date(currentTime).toLocaleTimeString());
+          console.log('Time remaining:', Math.round((expiresAt - currentTime) / 1000), 'seconds');
+          
+          if (expiresAt > currentTime) {
+            // Token is still valid, set up expiration timer
+            const timeRemaining = expiresAt - currentTime;
+            setupExpirationTimer(timeRemaining / 1000); // Convert back to seconds
+          } else {
+            // Token has already expired
+            console.log('Token has already expired');
+            logout();
+          }
+        } catch (decodeError) {
+          console.error('Error decoding JWT token:', decodeError);
+          // Continue with the default timeout if decoding fails
+          setupExpirationTimer(20);
+        }
+        */
       } catch (error) {
         console.error('Error setting up token expiration:', error);
         logout(); // Logout on error
