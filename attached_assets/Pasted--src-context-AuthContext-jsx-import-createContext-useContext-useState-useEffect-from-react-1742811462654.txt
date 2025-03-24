@@ -1,0 +1,83 @@
+// src/context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'wouter';
+
+const AuthContext = createContext(null);
+
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(localStorage.getItem('accessToken'));
+  const [, navigate] = useNavigate();
+  
+  // Function to handle login and set up expiration timer
+  const login = (accessToken, expiresIn) => {
+    // Store token in localStorage
+    localStorage.setItem('accessToken', accessToken);
+    setToken(accessToken);
+    
+    // Set up expiration timer
+    setupExpirationTimer(expiresIn);
+  };
+  
+  // Function to handle logout
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    setToken(null);
+    navigate('/login'); // Redirect to login page
+  };
+  
+  // Function to set up token expiration timer
+  const setupExpirationTimer = (expiresIn) => {
+    // Clear any existing timers
+    if (window.tokenExpirationTimer) {
+      clearTimeout(window.tokenExpirationTimer);
+    }
+    
+    // Convert expiresIn to milliseconds (assuming it's in seconds)
+    const expirationTime = expiresIn * 1000;
+    
+    // Set timeout to logout when token expires
+    window.tokenExpirationTimer = setTimeout(() => {
+      console.log('Token expired, logging out...');
+      logout();
+    }, expirationTime);
+  };
+  
+  // On component mount, check if token exists and set up expiration timer
+  useEffect(() => {
+    if (token) {
+      try {
+        // Decode token to get expiration time (assumes JWT)
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        const expiresAt = tokenData.exp * 1000; // Convert to milliseconds
+        const currentTime = Date.now();
+        
+        if (expiresAt > currentTime) {
+          // Token is still valid, set up expiration timer
+          const timeRemaining = expiresAt - currentTime;
+          setupExpirationTimer(timeRemaining / 1000); // Convert back to seconds
+        } else {
+          // Token has already expired
+          logout();
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        logout(); // Logout on token parsing error
+      }
+    }
+    
+    // Cleanup timer on unmount
+    return () => {
+      if (window.tokenExpirationTimer) {
+        clearTimeout(window.tokenExpirationTimer);
+      }
+    };
+  }, []);
+  
+  return (
+    <AuthContext.Provider value={{ token, login, logout, isAuthenticated: !!token }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
